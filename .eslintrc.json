@@ -3,7 +3,7 @@
     "browser": true,
     "es2021": true
   },
-  "extends": ["react-app", "plugin:react/recommended", "standard"],
+  "extends": ["plugin:react/recommended", "standard"],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true

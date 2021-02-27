@@ -1,5 +1,1 @@
-console.log("asd" + "asss "
-
-+ "
-
-dsdd");
+console.log('asd' + 'asss ' + 'dsdd')
