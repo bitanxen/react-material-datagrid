@@ -14,9 +14,6 @@
   "module": "dist/index.modern.js",
   "umd:main": "dist/index.umd.js",
   "scripts": {
-    "prebuild": "rimraf dist",
-    "prepublish": "npm run build",
-    "build": "rollup -c",
     "watch": "rollup -c --watch",
     "dev": "concurrently \" npm run watch \" \" npm run start --prefix examples/react-material-ui-datagrid \"  ",
     "lint": "eslint '**/*.js'",
