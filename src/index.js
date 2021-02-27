@@ -1,1 +1,1 @@
-console.log('asd' + 'asss ' + 'dsdd')
+export { default as MaterialDataGrid } from './datagrid/MaterialDataGrid'

@@ -4,5 +4,6 @@
   "tabWidth": 2,
   "useTabs": false,
   "endOfLine": "lf",
-  "semi": false
+  "semi": false,
+  "trailingComma": "none"
 }
