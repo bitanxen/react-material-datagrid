@@ -1,8 +1,31 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { MaterialDataGrid } from 'react-material-datagrid'
 import './style.css'
 
 function App() {
+  const [data, setData] = useState([])
+
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then((response) => response.json())
+      .then((json) => {
+        setData(
+          json.map((j) => ({
+            userId: j.id,
+            firstName: j.name.split(' ')[0],
+            lastName: j.name.split(' ')[1],
+            email: j.email,
+            age: Math.random() * (60 - 20) + 20,
+            phone: j.phone,
+            website: j.website,
+            address: `${j.address.street} ${j.address.suite}`,
+            zipcode: j.address.zipcode,
+            company: j.company.name
+          }))
+        )
+      })
+  }, [])
+
   return (
     <div className="App">
       <MaterialDataGrid
@@ -27,6 +50,20 @@ function App() {
             resize: true
           },
           {
+            colId: 'email',
+            colName: 'Email ID',
+            dataType: 'string',
+            display: true,
+            width: 150
+          },
+          {
+            colId: 'phone',
+            colName: 'Phone',
+            dataType: 'string',
+            display: true,
+            width: 150
+          },
+          {
             colId: 'age',
             colName: 'Age',
             dataType: 'number',
@@ -34,8 +71,8 @@ function App() {
             width: 150
           },
           {
-            colId: 'gender',
-            colName: 'Gender',
+            colId: 'website',
+            colName: 'Website',
             dataType: 'string',
             display: true,
             width: 150
@@ -46,9 +83,24 @@ function App() {
             dataType: 'string',
             display: true,
             width: 350
+          },
+          {
+            colId: 'zipcode',
+            colName: 'ZipCode',
+            dataType: 'string',
+            display: true,
+            width: 150
+          },
+          {
+            colId: 'company',
+            colName: 'Company',
+            dataType: 'string',
+            display: true,
+            width: 350
           }
         ]}
         fitColumns={true}
+        data={data}
       />
     </div>
   )

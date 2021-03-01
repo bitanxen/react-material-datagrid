@@ -19,7 +19,8 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex'
   },
   tableFreezeSection: {
-    overflow: 'auto'
+    overflow: 'auto',
+    boxShadow: '5px 0px 1px #DDD'
   }
 }))
 
@@ -44,6 +45,8 @@ function MaterialDataGrid(props) {
     tableTools,
     toolIconColor
   } = props
+
+  console.log(data)
 
   useEffect(() => {
     if (tableSize) {
