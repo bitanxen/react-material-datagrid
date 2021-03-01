@@ -37,7 +37,13 @@
       "npm run lint:fix"
     ]
   },
-  "dependencies": {},
+  "dependencies": {
+    "@material-ui/core": "4.9.2",
+    "@material-ui/icons": "4.5.1",
+    "@material-ui/pickers": "3.2.10",
+    "lodash": "^4.17.21",
+    "uuid": "8.3.2"
+  },
   "devDependencies": {
     "@babel/core": "^7.13.8",
     "@babel/preset-env": "^7.13.8",
@@ -47,21 +53,26 @@
     "@rollup/plugin-node-resolve": "^11.2.0",
     "babel-plugin-macros": "^3.0.1",
     "babel-plugin-styled-components": "^1.12.0",
+    "clsx": "^1.1.1",
+    "concurrently": "^6.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^7.20.0",
+    "eslint-config-react-app": "^6.0.0",
     "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-flowtype": "^5.3.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "husky": "^4.3.8",
-    "i": "^0.3.6",
     "lint-staged": "^10.2.11",
     "npm": "^7.6.0",
     "prettier": "^2.2.1",
     "prettier-eslint-cli": "^5.0.0",
     "pretty-quick": "^3.1.0",
-    "react": "^16.8.1",
+    "react": "^16.10.2",
+    "react-resizable": "^1.11.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.40.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
@@ -69,7 +80,9 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-uglify": "^6.0.4"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "react": ">=16.10"
+  },
   "files": [
     "dist"
   ],

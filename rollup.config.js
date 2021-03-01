@@ -1,5 +1,5 @@
 import resolve from '@rollup/plugin-node-resolve'
-// import commonjs from "@rollup/plugin-commonjs"
+import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import { terser } from 'rollup-plugin-terser'
 import externalPeer from 'rollup-plugin-peer-deps-external'
@@ -12,7 +12,11 @@ const production = !process.env.ROLLUP_WATCH
 
 const globals = {
   react: 'React',
-  'prop-types': 'PropTypes'
+  'prop-types': 'PropTypes',
+  '@material-ui/core': 'Material UI Core',
+  lodash: '_',
+  uuid: 'uuid',
+  'react-resizable': 'ReactResizable'
 }
 
 const external = Object.keys(globals)
@@ -37,6 +41,9 @@ const output = (format, fileName) => {
 
 const commonPlugins = [
   resolve({ preferBuiltins: true, browser: true, ...external }),
+  commonjs({
+    include: 'node_modules/**'
+  }),
   babel(babelOptions),
   externalPeer(),
   postcss({
@@ -65,7 +72,5 @@ const rollup = [
     external
   }
 ]
-
-console.log(rollup)
 
 export default rollup
