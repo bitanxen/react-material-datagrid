@@ -6,7 +6,8 @@ import {
   Popover,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Divider
 } from '@material-ui/core'
 import {
   MoreVert,
@@ -47,7 +48,8 @@ const useStyles = makeStyles((theme) => ({
   headerCell: {
     display: 'flex',
     justifyContent: 'space-between',
-    height: '100%'
+    height: '100%',
+    borderBottom: '0.5px solid #878C97'
   },
   headerCellInfo: {
     margin: 'auto 0'
@@ -104,7 +106,7 @@ function MaterialHeader(props) {
   const classes = useStyles()
   const [headerTools, setHeaderTools] = useState({
     target: null,
-    colId: null
+    header: null
   })
   const {
     tableSize,
@@ -112,20 +114,22 @@ function MaterialHeader(props) {
     resizeHandler,
     freezeColumnHandler,
     freezeSection,
-    toggleShowHideColumn
+    toggleShowHideColumn,
+    sorting,
+    sortColumn
   } = props
 
   const closeHeaderTool = () => {
     setHeaderTools({
       target: null,
-      colId: null
+      header: null
     })
   }
 
-  const openHeaderTool = (event, colId) => {
+  const openHeaderTool = (event, header) => {
     setHeaderTools({
       target: event.currentTarget,
-      colId: colId
+      header: header
     })
   }
 
@@ -156,20 +160,31 @@ function MaterialHeader(props) {
             handleSize={[15, 15]}
             onResize={(e, resize) => resizeHandler(h, e, resize)}
           >
-            <div
-              className={classes.headerCell}
-              style={{ borderRight: '1px solid #000' }}
-            >
+            <div className={classes.headerCell}>
               <div
-                className={classes.headerCellInfo}
-                style={{ width: h.targetWidth - 120 }}
+                style={{ display: 'flex', cursor: 'pointer' }}
+                onClick={() => sortColumn(h)}
               >
-                <Typography className={classes.headerText} variant="body2">
-                  {h.colName} {h.minWidth} {h.targetWidth} {h.width}
-                </Typography>
-              </div>
-              <div className={classes.headerOrder}>
-                <ArrowDownwardSharp fontSize="small" />
+                <div
+                  className={classes.headerCellInfo}
+                  style={{ width: h.targetWidth - 120 }}
+                >
+                  <Typography className={classes.headerText} variant="body2">
+                    {h.colName}
+                  </Typography>
+                </div>
+
+                <div className={classes.headerOrder}>
+                  {sorting && sorting.property === h.colId && (
+                    <>
+                      {sorting.order === 'desc' ? (
+                        <ArrowDownwardSharp fontSize="small" />
+                      ) : (
+                        <ArrowUpwardSharp fontSize="small" />
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
               <div className={clsx(classes.headerTools, classes.hoverShow)}>
                 <IconButton
@@ -192,7 +207,7 @@ function MaterialHeader(props) {
                 <IconButton
                   aria-label="Column Settings"
                   size="small"
-                  onClick={(e) => openHeaderTool(e, h.colId)}
+                  onClick={(e) => openHeaderTool(e, h)}
                 >
                   <MoreVert fontSize="inherit" />
                 </IconButton>
@@ -215,6 +230,9 @@ function MaterialHeader(props) {
       >
         <MenuItem
           onClick={() => {
+            if (headerTools && headerTools.header) {
+              sortColumn(headerTools.header)
+            }
             closeHeaderTool()
           }}
           className={classes.menuItem}
@@ -226,6 +244,9 @@ function MaterialHeader(props) {
         </MenuItem>
         <MenuItem
           onClick={() => {
+            if (headerTools && headerTools.header) {
+              sortColumn(headerTools.header)
+            }
             closeHeaderTool()
           }}
           className={classes.menuItem}
@@ -237,7 +258,9 @@ function MaterialHeader(props) {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            toggleShowHideColumn(headerTools.colId)
+            if (headerTools && headerTools.header) {
+              toggleShowHideColumn(headerTools.header.colId)
+            }
             closeHeaderTool()
           }}
           className={classes.menuItem}
@@ -255,8 +278,11 @@ function MaterialHeader(props) {
 MaterialHeader.propTypes = {
   tableSize: PropTypes.string.isRequired,
   resizeHandler: PropTypes.func.isRequired,
+  header: PropTypes.array.isRequired,
   freezeColumnHandler: PropTypes.func.isRequired,
   freezeSection: PropTypes.bool.isRequired,
-  toggleShowHideColumn: PropTypes.func.isRequired
+  toggleShowHideColumn: PropTypes.func.isRequired,
+  sorting: PropTypes.object,
+  sortColumn: PropTypes.func.isRequired
 }
 export default MaterialHeader

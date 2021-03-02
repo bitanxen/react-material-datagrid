@@ -267,7 +267,8 @@ MaterialToolbar.propTypes = {
   searchHandler: PropTypes.func.isRequired,
   filterhandler: PropTypes.func.isRequired,
   downloadHandler: PropTypes.func.isRequired,
-  resetColumnHandler: PropTypes.func.isRequired
+  resetColumnHandler: PropTypes.func.isRequired,
+  sorting: PropTypes.object
 }
 
 export default MaterialToolbar

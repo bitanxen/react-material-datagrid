@@ -1,18 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 import {
   makeStyles,
   createGenerateClassName,
   StylesProvider,
   Paper,
-  ThemeProvider,
-  Divider
+  ThemeProvider
 } from '@material-ui/core'
 
 import useWidth from '../hooks/useWidth'
 import { breakpointQuery, newMuiTheme } from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
 import MaterialHeader from './MaterialHeader'
+import MaterialBody from './MaterialBody'
 
 const useStyles = makeStyles((theme) => ({
   tableWrapper: {
@@ -30,6 +30,8 @@ function MaterialDataGrid(props) {
   const width = useWidth(containerRef)
   const [calculatedSize, setCaluclatedSize] = useState('medium')
   const [calculatedHeader, setCalculatedHeader] = useState([])
+  const [calculatedData, setCalculatedData] = useState([])
+  const [calculatedSorting, setCalculatedSorting] = useState(null)
 
   const {
     theme,
@@ -45,8 +47,6 @@ function MaterialDataGrid(props) {
     tableTools,
     toolIconColor
   } = props
-
-  console.log(data)
 
   useEffect(() => {
     if (tableSize) {
@@ -97,21 +97,45 @@ function MaterialDataGrid(props) {
   }, [width, fitColumns, calculatedHeader])
 
   useEffect(() => {
-    setCalculatedHeader(
-      header.map((h) => {
-        h.width = h.width ? h.width : 100
-        h.minWidth = h.width + 125
-        h.targetWidth = h.width + 125
-        h.maxWidth = h.maxWidth + 125
-        h.freeze = h.freeze || false
-        return h
+    const preparedHeader = header.map((h) => {
+      h.width = h.width ? h.width : 100
+      h.minWidth = h.width + 125
+      h.targetWidth = h.width + 125
+      h.maxWidth = h.maxWidth + 125
+      h.freeze = h.freeze || false
+      return h
+    })
+
+    const sortingArray = preparedHeader.filter((h) => h.sort)
+    if (sortingArray.length > 0) {
+      const sortingColumn = sortingArray[0]
+      setCalculatedSorting({
+        order: sortingColumn.sort,
+        property: sortingColumn.colId
       })
-    )
+    }
+
+    setCalculatedHeader(preparedHeader)
   }, [header])
 
   useEffect(() => {
     refitColumns()
   }, [refitColumns])
+
+  const prepareData = useMemo(() => {
+    const preparedData = data.map((d) => {
+      const row = {}
+      calculatedHeader.forEach((h) => {
+        row[h.colId] = h.dataValue ? h.dataValue(d) : d[h.colId]
+      })
+      return row
+    })
+    return preparedData || []
+  }, [data, calculatedHeader])
+
+  useEffect(() => {
+    setCalculatedData(prepareData)
+  }, [prepareData])
 
   const resizeHandler = (header, event, resize) => {
     if (resize.size.width >= header.width + 125) {
@@ -143,7 +167,6 @@ function MaterialDataGrid(props) {
   }
 
   const toggleShowHideColumn = (colId) => {
-    console.log(colId)
     setCalculatedHeader(
       calculatedHeader.map((h) => {
         if (h.colId === colId) {
@@ -183,6 +206,25 @@ function MaterialDataGrid(props) {
     }
   }
 
+  const sortColumn = (h) => {
+    const isDesc =
+      calculatedSorting &&
+      calculatedSorting.property === h.colId &&
+      calculatedSorting.order === 'desc'
+    console.log('isDesc', isDesc)
+    if (isDesc) {
+      setCalculatedSorting({
+        order: 'asc',
+        property: h.colId
+      })
+    } else {
+      setCalculatedSorting({
+        order: 'desc',
+        property: h.colId
+      })
+    }
+  }
+
   const getRegularColWidth = () => {
     const freezeWidth = getFreezeColWidth()
     return width - freezeWidth
@@ -207,6 +249,7 @@ function MaterialDataGrid(props) {
               filterhandler={() => {}}
               downloadHandler={() => {}}
               resetColumnHandler={() => {}}
+              sorting={calculatedSorting}
             />
             <div className={classes.tableWrapper} style={{ width: width }}>
               <div
@@ -220,8 +263,16 @@ function MaterialDataGrid(props) {
                   freezeColumnHandler={freezeColumnHandler}
                   freezeSection={true}
                   toggleShowHideColumn={toggleShowHideColumn}
+                  sorting={calculatedSorting}
+                  sortColumn={sortColumn}
                 />
-                <Divider />
+                <MaterialBody
+                  tableSize={calculatedSize}
+                  freezeSection={true}
+                  header={calculatedHeader}
+                  data={calculatedData}
+                  sorting={calculatedSorting}
+                />
               </div>
               <div
                 style={{
@@ -237,8 +288,16 @@ function MaterialDataGrid(props) {
                   freezeColumnHandler={freezeColumnHandler}
                   freezeSection={false}
                   toggleShowHideColumn={toggleShowHideColumn}
+                  sorting={calculatedSorting}
+                  sortColumn={sortColumn}
                 />
-                <Divider />
+                <MaterialBody
+                  tableSize={calculatedSize}
+                  freezeSection={false}
+                  header={calculatedHeader}
+                  data={calculatedData}
+                  sorting={calculatedSorting}
+                />
               </div>
             </div>
             hi
@@ -305,7 +364,8 @@ MaterialDataGrid.propTypes = {
       display: PropTypes.bool,
       resize: PropTypes.bool,
       width: PropTypes.number,
-      maxWidth: PropTypes.number
+      maxWidth: PropTypes.number,
+      sort: PropTypes.oneOf(['asc', 'desc'])
     })
   ).isRequired,
   fitColumns: PropTypes.bool,

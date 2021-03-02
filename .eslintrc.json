@@ -15,6 +15,7 @@
   "rules": {
     "no-console": "warn",
     "space-before-function-paren": "off",
+    "multiline-ternary": "off",
     "indent": "off",
     "react/prop-types": "off",
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
