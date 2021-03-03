@@ -34,7 +34,7 @@ function MaterialBody(props) {
                   style={{
                     minWidth: h.targetWidth,
                     width: h.targetWidth,
-                    padding: '10px 2px'
+                    padding: '6px 2px'
                   }}
                   key={h.colId}
                 >

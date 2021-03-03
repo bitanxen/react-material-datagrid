@@ -29,17 +29,17 @@ const useStyles = makeStyles((theme) => ({
   smallSpacing: {
     padding: '0.2rem 0',
     fontSize: '0.7rem',
-    height: 30
+    height: 40
   },
   mediumSpacing: {
     padding: '0.25rem 0',
     fontSize: '0.8rem',
-    height: 35
+    height: 45
   },
   largeSpacing: {
     padding: '0.3rem 0',
     fontSize: '1rem',
-    height: 40
+    height: 50
   },
   headerCells: {
     padding: '0 0.5rem',
@@ -236,6 +236,12 @@ function MaterialHeader(props) {
             closeHeaderTool()
           }}
           className={classes.menuItem}
+          disabled={
+            headerTools &&
+            headerTools.header &&
+            sorting &&
+            sorting.order === 'desc'
+          }
         >
           <ListItemIcon className={classes.menuIcon}>
             <ArrowUpwardSharp fontSize="small" />
@@ -250,6 +256,12 @@ function MaterialHeader(props) {
             closeHeaderTool()
           }}
           className={classes.menuItem}
+          disabled={
+            headerTools &&
+            headerTools.header &&
+            sorting &&
+            sorting.order === 'asc'
+          }
         >
           <ListItemIcon className={classes.menuIcon}>
             <ArrowDownwardSharp fontSize="small" />
