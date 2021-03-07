@@ -1,4 +1,4 @@
-import { Search, FilterList, CloudDownload, Settings } from '@material-ui/icons'
+import { Settings } from '@material-ui/icons'
 import { createMuiTheme } from '@material-ui/core'
 import { purple, green } from '@material-ui/core/colors'
 
@@ -46,6 +46,7 @@ export const getDefaultTools = (
   settingsHandler
 ) => {
   return [
+    /*
     {
       name: 'Search',
       icon: Search,
@@ -64,6 +65,7 @@ export const getDefaultTools = (
       clickHandler: downloadhandler,
       display: isDownloadable
     },
+    */
     {
       name: 'Settings',
       icon: Settings,
@@ -115,4 +117,9 @@ export const getSorting = (sorting) => {
   return sorting.order === 'desc'
     ? (a, b) => desc(a, b, sorting.property)
     : (a, b) => -desc(a, b, sorting.property)
+}
+
+export const range = (start, end) => {
+  const length = end - start + 1
+  return Array.from({ length }, (_, i) => start + i)
 }

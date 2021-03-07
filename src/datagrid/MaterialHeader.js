@@ -7,7 +7,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Divider
+  Checkbox
 } from '@material-ui/core'
 import {
   MoreVert,
@@ -15,7 +15,8 @@ import {
   FilterList,
   ArrowDownwardSharp,
   ArrowUpwardSharp,
-  VisibilityOff
+  VisibilityOff,
+  Clear
 } from '@material-ui/icons'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
@@ -27,17 +28,14 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center'
   },
   smallSpacing: {
-    padding: '0.2rem 0',
     fontSize: '0.7rem',
     height: 40
   },
   mediumSpacing: {
-    padding: '0.25rem 0',
     fontSize: '0.8rem',
     height: 45
   },
   largeSpacing: {
-    padding: '0.3rem 0',
     fontSize: '1rem',
     height: 50
   },
@@ -99,6 +97,10 @@ const useStyles = makeStyles((theme) => ({
   },
   menuIcon: {
     minWidth: '30px'
+  },
+  menuIconDisplay: {
+    height: '30px',
+    margin: 'auto'
   }
 }))
 
@@ -111,12 +113,19 @@ function MaterialHeader(props) {
   const {
     tableSize,
     header,
+    data,
     resizeHandler,
     freezeColumnHandler,
     freezeSection,
+    freezeColumnWidth,
     toggleShowHideColumn,
     sorting,
-    sortColumn
+    sortColumn,
+    unsortColumn,
+    allRowSelectionHandler,
+    dataSelectionHandler,
+    calculatedSelected,
+    selectionVariant
   } = props
 
   const closeHeaderTool = () => {
@@ -144,6 +153,25 @@ function MaterialHeader(props) {
           : classes.largeSpacing
       )}
     >
+      {((freezeSection && freezeColumnWidth > 0) ||
+        (!freezeSection && freezeColumnWidth === 0)) &&
+        (dataSelectionHandler || calculatedSelected) && (
+          <div className={classes.headerCell} style={{ width: '45px' }}>
+            <Checkbox
+              checked={
+                calculatedSelected && calculatedSelected.length === data.length
+              }
+              indeterminate={
+                calculatedSelected &&
+                calculatedSelected.length > 0 &&
+                calculatedSelected.length !== data.length
+              }
+              disabled={selectionVariant === 'single' || !dataSelectionHandler}
+              onChange={() => allRowSelectionHandler()}
+              inputProps={{ 'aria-label': 'primary checkbox' }}
+            />
+          </div>
+        )}
       {header
         .filter((h) => h.display)
         .filter((h) => h.freeze === freezeSection)
@@ -178,9 +206,9 @@ function MaterialHeader(props) {
                   {sorting && sorting.property === h.colId && (
                     <>
                       {sorting.order === 'desc' ? (
-                        <ArrowDownwardSharp fontSize="small" />
-                      ) : (
                         <ArrowUpwardSharp fontSize="small" />
+                      ) : (
+                        <ArrowDownwardSharp fontSize="small" />
                       )}
                     </>
                   )}
@@ -190,9 +218,10 @@ function MaterialHeader(props) {
                 <IconButton
                   aria-label="Column Freezed"
                   size="small"
-                  className={
+                  className={clsx(
+                    classes.menuIconDisplay,
                     !h.freeze ? classes.defaultHide : classes.defaultShow
-                  }
+                  )}
                   onClick={() => freezeColumnHandler(h.colId)}
                 >
                   <Lock fontSize="inherit" />
@@ -200,7 +229,7 @@ function MaterialHeader(props) {
                 <IconButton
                   aria-label="Column Filtered"
                   size="small"
-                  className={classes.defaultHide}
+                  className={clsx(classes.defaultHide, classes.menuIconDisplay)}
                 >
                   <FilterList fontSize="inherit" />
                 </IconButton>
@@ -208,6 +237,7 @@ function MaterialHeader(props) {
                   aria-label="Column Settings"
                   size="small"
                   onClick={(e) => openHeaderTool(e, h)}
+                  className={clsx(classes.menuIconDisplay)}
                 >
                   <MoreVert fontSize="inherit" />
                 </IconButton>
@@ -228,6 +258,20 @@ function MaterialHeader(props) {
           horizontal: 'center'
         }}
       >
+        {sorting && (
+          <MenuItem
+            onClick={() => {
+              unsortColumn()
+              closeHeaderTool()
+            }}
+            className={classes.menuItem}
+          >
+            <ListItemIcon className={classes.menuIcon}>
+              <Clear fontSize="small" />
+            </ListItemIcon>
+            <ListItemText disableTypography primary="Unsort" />
+          </MenuItem>
+        )}
         <MenuItem
           onClick={() => {
             if (headerTools && headerTools.header) {
@@ -291,10 +335,17 @@ MaterialHeader.propTypes = {
   tableSize: PropTypes.string.isRequired,
   resizeHandler: PropTypes.func.isRequired,
   header: PropTypes.array.isRequired,
+  data: PropTypes.array,
   freezeColumnHandler: PropTypes.func.isRequired,
   freezeSection: PropTypes.bool.isRequired,
   toggleShowHideColumn: PropTypes.func.isRequired,
   sorting: PropTypes.object,
-  sortColumn: PropTypes.func.isRequired
+  sortColumn: PropTypes.func.isRequired,
+  unsortColumn: PropTypes.func.isRequired,
+  freezeColumnWidth: PropTypes.number.isRequired,
+  calculatedSelected: PropTypes.any,
+  allRowSelectionHandler: PropTypes.func.isRequired,
+  dataSelectionHandler: PropTypes.func,
+  selectionVariant: PropTypes.string.isRequired
 }
 export default MaterialHeader

@@ -13,10 +13,12 @@ const production = !process.env.ROLLUP_WATCH
 const globals = {
   react: 'React',
   'prop-types': 'PropTypes',
-  '@material-ui/core': 'Material UI Core',
+  '@material-ui/core': 'MaterialUICore',
+  '@material-ui/icon': 'MaterialUIIcon',
   lodash: '_',
   uuid: 'uuid',
-  'react-resizable': 'ReactResizable'
+  'react-resizable': 'ReactResizable',
+  'react-beautiful-dnd': 'ReactBeautifulDnd'
 }
 
 const external = Object.keys(globals)

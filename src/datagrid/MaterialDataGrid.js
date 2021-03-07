@@ -7,16 +7,19 @@ import {
   Paper,
   ThemeProvider
 } from '@material-ui/core'
+import _ from 'lodash'
 
 import useWidth from '../hooks/useWidth'
 import { breakpointQuery, newMuiTheme } from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
 import MaterialHeader from './MaterialHeader'
 import MaterialBody from './MaterialBody'
+import MaterialFooter from './MaterialFooter'
 
 const useStyles = makeStyles((theme) => ({
   tableWrapper: {
-    display: 'flex'
+    display: 'flex',
+    overflow: 'hidden'
   },
   tableFreezeSection: {
     overflow: 'auto',
@@ -32,9 +35,15 @@ function MaterialDataGrid(props) {
   const [calculatedHeader, setCalculatedHeader] = useState([])
   const [calculatedData, setCalculatedData] = useState([])
   const [calculatedSorting, setCalculatedSorting] = useState(null)
+  const [calculatedSelected, setCalculatedSelected] = useState(null)
+  const [calculatedKeyCol, setCalculatedKeyCol] = useState(null)
+  const [calculatedPage, setCalculatedPage] = useState(1)
+  const [rowPerPage, setRowPerPage] = useState(10)
+  const [rowsOptions, setRowsOptions] = useState([])
 
   const {
     theme,
+    className,
     tableName,
     header,
     fitColumns,
@@ -45,8 +54,19 @@ function MaterialDataGrid(props) {
     downloadable,
     settingsProps,
     tableTools,
-    toolIconColor
+    toolIconColor,
+    dataSelected,
+    selectionVariant,
+    dataSelectionHandler,
+    pagination,
+    rowsPerPageOptions,
+    defaultRowsPerPage
   } = props
+
+  useEffect(() => {
+    setRowsOptions(rowsPerPageOptions)
+    setRowPerPage(defaultRowsPerPage)
+  }, [rowsPerPageOptions, defaultRowsPerPage])
 
   useEffect(() => {
     if (tableSize) {
@@ -69,7 +89,7 @@ function MaterialDataGrid(props) {
     if (fitColumns) {
       const totalColumnWidth = calculatedHeader
         .filter((h) => h.display)
-        .map((h) => h.targetWidth)
+        .map((h) => h.width + 125)
         .reduce((t, n) => t + n, 0)
 
       const fitCompletedArray = calculatedHeader.filter((h) => h.fitDone)
@@ -78,23 +98,36 @@ function MaterialDataGrid(props) {
         totalColumnWidth > 0 &&
         totalColumnWidth < width
       ) {
+        const visiableColumns = calculatedHeader.filter((h) => h.display)
+        let checkBox = 0
+
+        if (dataSelectionHandler || calculatedSelected) {
+          checkBox = 45
+        }
+
         const poportion =
-          (width - totalColumnWidth) / calculatedHeader.length - 2
+          (width - totalColumnWidth - checkBox) / visiableColumns.length - 2
 
         setCalculatedHeader(
-          calculatedHeader
-            .filter((h) => h.display)
-            .map((h) => {
-              h.minWidth = h.minWidth + poportion
-              h.targetWidth = h.targetWidth + poportion
-              h.maxWidth = h.maxWidth + poportion
+          calculatedHeader.map((h) => {
+            if (h.display) {
+              h.minWidth = h.width + 125 + poportion
+              h.targetWidth = h.width + 125 + poportion
+              h.maxWidth = h.maxWidth + 125 + poportion
               h.fitDone = true
-              return h
-            })
+            }
+            return h
+          })
         )
       }
     }
-  }, [width, fitColumns, calculatedHeader])
+  }, [
+    width,
+    fitColumns,
+    calculatedHeader,
+    dataSelectionHandler,
+    calculatedSelected
+  ])
 
   useEffect(() => {
     const preparedHeader = header.map((h) => {
@@ -115,6 +148,11 @@ function MaterialDataGrid(props) {
       })
     }
 
+    const idColArray = preparedHeader.filter((h) => h.isIdCol)
+    if (idColArray.length > 0) {
+      setCalculatedKeyCol(idColArray[0].colId)
+    }
+
     setCalculatedHeader(preparedHeader)
   }, [header])
 
@@ -127,6 +165,9 @@ function MaterialDataGrid(props) {
       const row = {}
       calculatedHeader.forEach((h) => {
         row[h.colId] = h.dataValue ? h.dataValue(d) : d[h.colId]
+        if (h.avaterSrc) {
+          row[`${h.colId}Avater`] = h.avaterSrc(d)
+        }
       })
       return row
     })
@@ -136,6 +177,47 @@ function MaterialDataGrid(props) {
   useEffect(() => {
     setCalculatedData(prepareData)
   }, [prepareData])
+
+  useEffect(() => {
+    if (calculatedData.length === 0) {
+      return
+    }
+    if (!calculatedKeyCol) {
+      return
+    }
+    if (calculatedSelected !== null) {
+      return
+    }
+
+    const providedSelected = Array.isArray(dataSelected) ? dataSelected : []
+    const selectedData = providedSelected
+      .map((keyColValue) => {
+        const foundSelectedData = calculatedData.filter(
+          (calculatedUnSelectedData) => {
+            return (
+              '' + calculatedUnSelectedData[calculatedKeyCol] === keyColValue
+            )
+          }
+        )
+        return foundSelectedData.length === 0 ? false : foundSelectedData[0]
+      })
+      .filter((d) => d !== false)
+    if (selectedData.length > 0) {
+      if (selectionVariant === 'single') {
+        setCalculatedSelected(selectedData[0])
+      } else {
+        setCalculatedSelected(selectedData)
+      }
+    } else if (dataSelected && Array.isArray(dataSelected)) {
+      setCalculatedSelected([])
+    }
+  }, [
+    dataSelected,
+    calculatedData,
+    calculatedKeyCol,
+    calculatedSelected,
+    selectionVariant
+  ])
 
   const resizeHandler = (header, event, resize) => {
     if (resize.size.width >= header.width + 125) {
@@ -178,9 +260,63 @@ function MaterialDataGrid(props) {
     )
   }
 
+  const columnReorder = (result) => {
+    if (!result) {
+      return
+    }
+    const items = _.clone(calculatedHeader)
+    const [reordered] = items.splice(result.source.index, 1)
+    items.splice(result.destination.index, 0, reordered)
+    setCalculatedHeader(items)
+  }
+
+  const singleRowSelectionHandler = (row) => {
+    const isAlreadySelected =
+      calculatedSelected && calculatedSelected.length > 0
+        ? calculatedSelected.filter(
+            (selectedRow) =>
+              selectedRow[calculatedKeyCol] === row[calculatedKeyCol]
+          )
+        : []
+
+    if (selectionVariant === 'single') {
+      if (isAlreadySelected.length > 0) {
+        setCalculatedSelected([])
+        dataSelectionHandler([])
+      } else {
+        setCalculatedSelected([row])
+        dataSelectionHandler([row])
+      }
+    } else {
+      if (isAlreadySelected.length > 0) {
+        const selected = calculatedSelected.filter(
+          (selectedRow) =>
+            selectedRow[calculatedKeyCol] !== row[calculatedKeyCol]
+        )
+        setCalculatedSelected(selected)
+        dataSelectionHandler(selected)
+      } else {
+        const selected = [...calculatedSelected, row]
+        setCalculatedSelected(selected)
+        dataSelectionHandler(selected)
+      }
+    }
+  }
+
+  const allRowSelectionHandler = () => {
+    if (calculatedSelected && calculatedSelected.length > 0) {
+      setCalculatedSelected([])
+      dataSelectionHandler([])
+    } else {
+      setCalculatedSelected(calculatedData)
+      dataSelectionHandler(calculatedData)
+    }
+  }
+
   const getFreezeColWidth = () => {
     const freezeWidth = calculatedHeader
       .filter((h) => h.freeze)
+      .filter((h) => h.display)
       .map((h) => h.targetWidth)
       .reduce((t, n) => t + n, 0)
     if (freezeWidth === 0) {
@@ -189,6 +325,7 @@ function MaterialDataGrid(props) {
 
     const regularWidth = calculatedHeader
       .filter((h) => !h.freeze)
+      .filter((h) => h.display)
       .map((h) => h.targetWidth)
       .reduce((t, n) => t + n, 0)
 
@@ -199,10 +336,10 @@ function MaterialDataGrid(props) {
       if (regularWidth > remaining) {
         return maxLimit
       } else {
-        return freezeWidth
+        return freezeWidth + 45
       }
     } else {
-      return freezeWidth
+      return freezeWidth + 45
     }
   }
 
@@ -211,7 +348,6 @@ function MaterialDataGrid(props) {
       calculatedSorting &&
       calculatedSorting.property === h.colId &&
       calculatedSorting.order === 'desc'
-    console.log('isDesc', isDesc)
     if (isDesc) {
       setCalculatedSorting({
         order: 'asc',
@@ -225,16 +361,28 @@ function MaterialDataGrid(props) {
     }
   }
 
+  const unsortColumn = () => {
+    setCalculatedSorting(null)
+  }
+
   const getRegularColWidth = () => {
     const freezeWidth = getFreezeColWidth()
     return width - freezeWidth
   }
 
+  const changePage = (page) => {
+    setCalculatedPage(page)
+  }
+
+  const changeRowPerPage = (e) => {
+    setRowPerPage(e.target.value)
+  }
+
   return (
     <StylesProvider generateClassName={createGenerateClassName()}>
       <ThemeProvider theme={theme || newMuiTheme()}>
-        <div ref={containerRef}>
-          <Paper>
+        <div ref={containerRef} className={className}>
+          <Paper style={{ backgroundColor: 'transparent' }}>
             <MaterialToolbar
               tableName={tableName}
               tableSize={calculatedSize}
@@ -248,30 +396,53 @@ function MaterialDataGrid(props) {
               searchHandler={() => {}}
               filterhandler={() => {}}
               downloadHandler={() => {}}
-              resetColumnHandler={() => {}}
               sorting={calculatedSorting}
+              header={calculatedHeader}
+              toggleShowHideColumn={toggleShowHideColumn}
+              columnReorderHandler={columnReorder}
+              calculatedSelected={calculatedSelected}
             />
-            <div className={classes.tableWrapper} style={{ width: width }}>
+            <div
+              className={classes.tableWrapper}
+              style={{ width: `${width}px`, maxWidth: '100%' }}
+            >
               <div
                 className={classes.tableFreezeSection}
-                style={{ width: getFreezeColWidth() }}
+                style={{
+                  width: getFreezeColWidth()
+                }}
               >
                 <MaterialHeader
                   tableSize={calculatedSize}
                   header={calculatedHeader}
+                  data={calculatedData}
                   resizeHandler={resizeHandler}
                   freezeColumnHandler={freezeColumnHandler}
                   freezeSection={true}
+                  freezeColumnWidth={getFreezeColWidth()}
                   toggleShowHideColumn={toggleShowHideColumn}
                   sorting={calculatedSorting}
                   sortColumn={sortColumn}
+                  unsortColumn={unsortColumn}
+                  calculatedSelected={calculatedSelected}
+                  allRowSelectionHandler={allRowSelectionHandler}
+                  dataSelectionHandler={dataSelectionHandler}
+                  selectionVariant={selectionVariant}
                 />
                 <MaterialBody
                   tableSize={calculatedSize}
                   freezeSection={true}
+                  freezeColumnWidth={getFreezeColWidth()}
                   header={calculatedHeader}
                   data={calculatedData}
                   sorting={calculatedSorting}
+                  calculatedSelected={calculatedSelected}
+                  calculatedKeyCol={calculatedKeyCol}
+                  singleRowSelectionHandler={singleRowSelectionHandler}
+                  dataSelectionHandler={dataSelectionHandler}
+                  selectionVariant={selectionVariant}
+                  rowsPerPage={rowPerPage}
+                  page={calculatedPage}
                 />
               </div>
               <div
@@ -284,29 +455,50 @@ function MaterialDataGrid(props) {
                 <MaterialHeader
                   tableSize={calculatedSize}
                   header={calculatedHeader}
+                  data={calculatedData}
                   resizeHandler={resizeHandler}
                   freezeColumnHandler={freezeColumnHandler}
                   freezeSection={false}
+                  freezeColumnWidth={getFreezeColWidth()}
                   toggleShowHideColumn={toggleShowHideColumn}
                   sorting={calculatedSorting}
                   sortColumn={sortColumn}
+                  unsortColumn={unsortColumn}
+                  calculatedSelected={calculatedSelected}
+                  allRowSelectionHandler={allRowSelectionHandler}
+                  dataSelectionHandler={dataSelectionHandler}
+                  selectionVariant={selectionVariant}
                 />
                 <MaterialBody
                   tableSize={calculatedSize}
                   freezeSection={false}
+                  freezeColumnWidth={getFreezeColWidth()}
                   header={calculatedHeader}
                   data={calculatedData}
                   sorting={calculatedSorting}
+                  calculatedSelected={calculatedSelected}
+                  calculatedKeyCol={calculatedKeyCol}
+                  singleRowSelectionHandler={singleRowSelectionHandler}
+                  dataSelectionHandler={dataSelectionHandler}
+                  selectionVariant={selectionVariant}
+                  rowsPerPage={rowPerPage}
+                  page={calculatedPage}
                 />
               </div>
             </div>
-            hi
-            <div>hello</div>
+            <MaterialFooter
+              page={calculatedPage}
+              rowPerPage={rowPerPage}
+              data={calculatedData}
+              boundaryCount={1}
+              siblingCount={width > 800 ? 1 : 0}
+              changePage={changePage}
+              width={width}
+              pagination={pagination}
+              changeRowPerPage={changeRowPerPage}
+              rowsOptions={rowsOptions}
+            />
           </Paper>
-          Width: {width}
-          <br />
-          Breakpoint: {calculatedSize}
-          <br />
         </div>
       </ThemeProvider>
     </StylesProvider>
@@ -319,18 +511,23 @@ MaterialDataGrid.defaultProps = {
   filterable: true,
   downloadable: true,
   settingsProps: {
-    resetColumn: true,
     resizeColumn: true,
     freezeColumm: true,
     columnRepositioning: true,
     ordering: true
   },
   tableTools: [],
-  toolIconColor: 'primary'
+  toolIconColor: 'primary',
+  selectionVariant: 'multi',
+  pagination: 'detailed',
+  rowsPerPageOptions: [5, 10, 25],
+  defaultRowsPerPage: 10,
+  strictBodyHeight: true
 }
 
 MaterialDataGrid.propTypes = {
   theme: PropTypes.object,
+  className: PropTypes.object,
   tableName: PropTypes.string.isRequired,
   tableSize: PropTypes.oneOf(['small', 'medium', 'large', undefined]),
   header: PropTypes.arrayOf(
@@ -349,7 +546,7 @@ MaterialDataGrid.propTypes = {
         'button',
         'avater'
       ]),
-      backgroundColor: PropTypes.string,
+      backgroundColor: PropTypes.any,
       buttonVariant: PropTypes.oneOf(['contained', 'outlined', 'text']),
       buttonColor: PropTypes.oneOf([
         'default',
@@ -357,9 +554,9 @@ MaterialDataGrid.propTypes = {
         'primary',
         'secondary'
       ]),
-      icon: PropTypes.node,
+      icon: PropTypes.any,
       avaterText: PropTypes.string,
-      avaterSrc: PropTypes.string,
+      avaterSrc: PropTypes.any,
       freeze: PropTypes.bool,
       display: PropTypes.bool,
       resize: PropTypes.bool,
@@ -374,7 +571,6 @@ MaterialDataGrid.propTypes = {
   filterable: PropTypes.bool,
   downloadable: PropTypes.bool,
   settingsProps: PropTypes.shape({
-    resetColumn: PropTypes.bool,
     resizeColumn: PropTypes.bool,
     freezeColumm: PropTypes.bool,
     columnRepositioning: PropTypes.bool,
@@ -383,7 +579,7 @@ MaterialDataGrid.propTypes = {
   tableTools: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
-      icon: PropTypes.node.isRequired,
+      icon: PropTypes.object.isRequired,
       clickHandler: PropTypes.func.isRequired,
       display: PropTypes.bool
     })
@@ -395,7 +591,12 @@ MaterialDataGrid.propTypes = {
     'secondary'
   ]),
   dataSelected: PropTypes.array,
-  dataSelectionHandler: PropTypes.func
+  selectionVariant: PropTypes.oneOf(['single', 'multi']),
+  dataSelectionHandler: PropTypes.func,
+  pagination: PropTypes.oneOf(['simple', 'detailed']),
+  rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
+  defaultRowsPerPage: PropTypes.number,
+  strictBodyHeight: PropTypes.bool
 }
 
 export default MaterialDataGrid

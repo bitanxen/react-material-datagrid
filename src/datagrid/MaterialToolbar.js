@@ -13,7 +13,8 @@ import { MoreVert } from '@material-ui/icons'
 import clsx from 'clsx'
 import _ from 'lodash'
 
-import { breakpointQuery, getDefaultTools } from '../utils/ApplicationUtils'
+import { getDefaultTools } from '../utils/ApplicationUtils'
+import HeaderSettings from './HeaderSettings'
 
 const useStyles = makeStyles((theme) => ({
   toolbarRoot: {
@@ -64,6 +65,7 @@ function MaterialToolbar(props) {
   const classes = useStyles()
   const [tools, setTools] = useState([])
   const [toolMenu, setToolMenu] = useState(null)
+  const [columnSetting, setColumnSetting] = useState(null)
   const {
     tableSize,
     tableName,
@@ -74,10 +76,10 @@ function MaterialToolbar(props) {
     settingsProps,
     tableTools,
     toolIconColor,
-    searchHandle,
-    filterhandler,
-    downloadHandler,
-    resetColumnHandler
+    header,
+    toggleShowHideColumn,
+    columnReorderHandler,
+    calculatedSelected
   } = props
 
   const openHiddenTools = (event) => {
@@ -90,7 +92,13 @@ function MaterialToolbar(props) {
 
   const startDownload = () => {}
 
-  const startReset = () => {}
+  const startReset = (event) => {
+    setColumnSetting(event.currentTarget)
+  }
+
+  const closeReset = () => {
+    setColumnSetting(null)
+  }
 
   useEffect(() => {
     const defaultTools = getDefaultTools(
@@ -153,7 +161,10 @@ function MaterialToolbar(props) {
     >
       <div className={classes.tableInfo}>
         <Typography className={classes.tableInfoText} variant="h5">
-          {tableName}
+          {tableName}{' '}
+          {calculatedSelected && calculatedSelected.length > 0 && (
+            <>: {calculatedSelected.length} selected</>
+          )}
         </Typography>
       </div>
       <div className={classes.tableToolInfo}>
@@ -166,6 +177,7 @@ function MaterialToolbar(props) {
               aria-label={tool.name}
               size={tableSize === 'small' ? tableSize : 'medium'}
               className={classes.visibleMenuIcons}
+              onClick={(e) => tool.clickHandler(e, calculatedSelected)}
             >
               <tool.icon fontSize="inherit" />
             </IconButton>
@@ -194,16 +206,14 @@ function MaterialToolbar(props) {
                 vertical: 'top',
                 horizontal: 'center'
               }}
-              classes={{
-                paper: 'py-8'
-              }}
             >
               {tools
                 .filter((t) => !t.show)
                 .map((tool, index) => (
                   <React.Fragment key={index}>
                     <MenuItem
-                      onClick={() => {
+                      onClick={(e) => {
+                        tool.clickHandler(e, calculatedSelected)
                         setToolMenu(null)
                       }}
                       className={classes.menuItem}
@@ -225,6 +235,13 @@ function MaterialToolbar(props) {
             </Popover>
           </div>
         )}
+        <HeaderSettings
+          tool={columnSetting}
+          closeTools={closeReset}
+          header={header}
+          toggleShowHideColumn={toggleShowHideColumn}
+          columnReorderHandler={columnReorderHandler}
+        />
       </div>
     </div>
   )
@@ -258,7 +275,7 @@ MaterialToolbar.propTypes = {
   tableTools: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
-      icon: PropTypes.node.isRequired,
+      icon: PropTypes.object.isRequired,
       clickHandler: PropTypes.func.isRequired,
       display: PropTypes.bool
     })
@@ -267,8 +284,11 @@ MaterialToolbar.propTypes = {
   searchHandler: PropTypes.func.isRequired,
   filterhandler: PropTypes.func.isRequired,
   downloadHandler: PropTypes.func.isRequired,
-  resetColumnHandler: PropTypes.func.isRequired,
-  sorting: PropTypes.object
+  sorting: PropTypes.object,
+  header: PropTypes.array.isRequired,
+  toggleShowHideColumn: PropTypes.func.isRequired,
+  columnReorderHandler: PropTypes.func.isRequired,
+  calculatedSelected: PropTypes.any
 }
 
 export default MaterialToolbar
