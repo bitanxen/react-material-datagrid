@@ -1,2 +1,3 @@
 # react-material-datagrid
-React Material-UI DataGrid
+
+[![npm version](https://badge.fury.io/js/react-material-datagrid.svg)](https://badge.fury.io/js/react-material-datagrid)
