@@ -1,9 +1,10 @@
 {
   "name": "react-material-datagrid",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "React Material UI DataGrid",
   "author": "Bitan Biswas <bitanxen@gmail.com>",
   "license": "MIT",
+  "homepage": "https://bitanxen.github.io/react-material-datagrid",
   "keywords": [
     "React Material UI Table",
     "Material UI Table",
@@ -27,7 +28,9 @@
     "test:build": "run-s build",
     "prepublish": "npm run build",
     "storybook": "start-storybook -c storybook",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook -c storybook",
+    "predeploy": "npm run build-storybook",
+    "deploy": "gh-pages -d storybook-static"
   },
   "husky": {
     "hooks": {
@@ -77,6 +80,7 @@
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "gh-pages": "^3.1.0",
     "husky": "^4.3.8",
     "lint-staged": "^10.2.11",
     "npm": "^7.6.0",
