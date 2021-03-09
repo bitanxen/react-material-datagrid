@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
   makeStyles,
   Typography,
@@ -106,10 +106,13 @@ const useStyles = makeStyles((theme) => ({
 
 function MaterialHeader(props) {
   const classes = useStyles()
+  const headerRef = useRef(null)
   const [headerTools, setHeaderTools] = useState({
     target: null,
     header: null
   })
+  const [checked, setChecked] = useState(false)
+  const [indeterminate, setIndeterminate] = useState(false)
   const {
     tableSize,
     header,
@@ -125,7 +128,8 @@ function MaterialHeader(props) {
     allRowSelectionHandler,
     dataSelectionHandler,
     calculatedSelected,
-    selectionVariant
+    selectionVariant,
+    scrollLeft
   } = props
 
   const closeHeaderTool = () => {
@@ -142,6 +146,22 @@ function MaterialHeader(props) {
     })
   }
 
+  useEffect(() => {
+    setChecked(calculatedSelected && calculatedSelected.length === data.length)
+  }, [calculatedSelected, data])
+
+  useEffect(() => {
+    setIndeterminate(
+      calculatedSelected &&
+        calculatedSelected.length > 0 &&
+        calculatedSelected.length !== data.length
+    )
+  }, [calculatedSelected, data])
+
+  useEffect(() => {
+    headerRef.current.scrollLeft = scrollLeft
+  }, [scrollLeft])
+
   return (
     <div
       className={clsx(
@@ -152,20 +172,17 @@ function MaterialHeader(props) {
           ? classes.mediumSpacing
           : classes.largeSpacing
       )}
+      style={{ position: 'absolute' }}
+      ref={headerRef}
     >
       {((freezeSection && freezeColumnWidth > 0) ||
         (!freezeSection && freezeColumnWidth === 0)) &&
-        (dataSelectionHandler || calculatedSelected) && (
+        (dataSelectionHandler || calculatedSelected) &&
+        checked !== null && (
           <div className={classes.headerCell} style={{ width: '45px' }}>
             <Checkbox
-              checked={
-                calculatedSelected && calculatedSelected.length === data.length
-              }
-              indeterminate={
-                calculatedSelected &&
-                calculatedSelected.length > 0 &&
-                calculatedSelected.length !== data.length
-              }
+              checked={checked}
+              indeterminate={indeterminate}
               disabled={selectionVariant === 'single' || !dataSelectionHandler}
               onChange={() => allRowSelectionHandler()}
               inputProps={{ 'aria-label': 'primary checkbox' }}

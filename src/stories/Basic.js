@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { MaterialDataGrid } from 'react-material-datagrid'
+import MaterialDataGrid from '../datagrid/MaterialDataGrid'
 import { Add, Delete } from '@material-ui/icons'
-import './style.css'
-import { IconButton } from '@material-ui/core'
 
 function App() {
   const [data, setData] = useState([])
@@ -31,7 +29,7 @@ function App() {
  */
 
   useEffect(() => {
-    fetch('https://randomuser.me/api/?results=50')
+    fetch('https://randomuser.me/api/?results=20')
       .then((response) => response.json())
       .then((json) => {
         setData(
@@ -84,7 +82,6 @@ function App() {
             sort: 'asc',
             avaterText: 'Hello',
             avaterSrc: (data) => {
-              //console.log(data)
               return data.picture
             }
           },
@@ -165,10 +162,7 @@ function App() {
           }
         ]}
         dataSelected={['1', '2', '7']}
-        selectionVariant="single"
-        dataSelectionHandler={() => {}}
-        rowsPerPageOptions={[5, 15]}
-        defaultRowsPerPage={5}
+        selectionVariant="multi"
       />
     </div>
   )

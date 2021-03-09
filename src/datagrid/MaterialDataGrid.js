@@ -10,6 +10,7 @@ import {
 import _ from 'lodash'
 
 import useWidth from '../hooks/useWidth'
+import useScroll from '../hooks/useScroll'
 import { breakpointQuery, newMuiTheme } from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
 import MaterialHeader from './MaterialHeader'
@@ -29,6 +30,8 @@ const useStyles = makeStyles((theme) => ({
 
 function MaterialDataGrid(props) {
   const containerRef = useRef(null)
+  const freezeSectionRef = useRef(null)
+  const regularSectionRef = useRef(null)
   const classes = useStyles()
   const width = useWidth(containerRef)
   const [calculatedSize, setCaluclatedSize] = useState('medium')
@@ -40,6 +43,8 @@ function MaterialDataGrid(props) {
   const [calculatedPage, setCalculatedPage] = useState(1)
   const [rowPerPage, setRowPerPage] = useState(10)
   const [rowsOptions, setRowsOptions] = useState([])
+  const [freezeSectionScroll, setFreezeSectionScroll] = useState(0)
+  const [regularSectionScroll, setRegularSectionScroll] = useState(0)
 
   const {
     theme,
@@ -375,6 +380,7 @@ function MaterialDataGrid(props) {
   }
 
   const changeRowPerPage = (e) => {
+    setCalculatedPage(1)
     setRowPerPage(e.target.value)
   }
 
@@ -411,6 +417,10 @@ function MaterialDataGrid(props) {
                 style={{
                   width: getFreezeColWidth()
                 }}
+                ref={freezeSectionRef}
+                onScroll={() => {
+                  setFreezeSectionScroll(freezeSectionRef.current.scrollLeft)
+                }}
               >
                 <MaterialHeader
                   tableSize={calculatedSize}
@@ -428,6 +438,7 @@ function MaterialDataGrid(props) {
                   allRowSelectionHandler={allRowSelectionHandler}
                   dataSelectionHandler={dataSelectionHandler}
                   selectionVariant={selectionVariant}
+                  scrollLeft={freezeSectionScroll}
                 />
                 <MaterialBody
                   tableSize={calculatedSize}
@@ -451,6 +462,10 @@ function MaterialDataGrid(props) {
                   overflow: 'auto',
                   padding: '0 0 0 5px'
                 }}
+                ref={regularSectionRef}
+                onScroll={() => {
+                  setRegularSectionScroll(regularSectionRef.current.scrollLeft)
+                }}
               >
                 <MaterialHeader
                   tableSize={calculatedSize}
@@ -468,6 +483,7 @@ function MaterialDataGrid(props) {
                   allRowSelectionHandler={allRowSelectionHandler}
                   dataSelectionHandler={dataSelectionHandler}
                   selectionVariant={selectionVariant}
+                  scrollLeft={regularSectionScroll}
                 />
                 <MaterialBody
                   tableSize={calculatedSize}

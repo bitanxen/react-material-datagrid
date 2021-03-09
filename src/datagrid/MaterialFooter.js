@@ -47,6 +47,7 @@ function MaterialFooter(props) {
     rowsOptions
   } = props
   const classes = useStyles()
+
   return (
     <div
       className={clsx(
@@ -54,16 +55,18 @@ function MaterialFooter(props) {
       )}
     >
       <div className={classes.footerRoot}>
-        <MaterialPagination
-          page={page}
-          rowPerPage={rowPerPage}
-          data={data}
-          boundaryCount={boundaryCount}
-          siblingCount={siblingCount}
-          changePage={changePage}
-          width={width}
-          pagination={pagination}
-        />
+        {data.length > 0 && (
+          <MaterialPagination
+            page={page}
+            rowPerPage={rowPerPage}
+            data={data}
+            boundaryCount={boundaryCount}
+            siblingCount={siblingCount}
+            changePage={changePage}
+            width={width}
+            pagination={pagination}
+          />
+        )}
       </div>
       <div
         className={classes.footerRoot}
@@ -73,7 +76,7 @@ function MaterialFooter(props) {
           <Select
             labelId="page-per-row-select-label"
             id="page-per-row-select"
-            value={rowPerPage}
+            value={rowsOptions.includes(rowPerPage) ? rowPerPage : ''}
             onChange={changeRowPerPage}
           >
             {rowsOptions.map((o, index) => (
