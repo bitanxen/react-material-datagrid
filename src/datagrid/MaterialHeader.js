@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   makeStyles,
   Typography,
@@ -106,7 +106,6 @@ const useStyles = makeStyles((theme) => ({
 
 function MaterialHeader(props) {
   const classes = useStyles()
-  const headerRef = useRef(null)
   const [headerTools, setHeaderTools] = useState({
     target: null,
     header: null
@@ -128,8 +127,7 @@ function MaterialHeader(props) {
     allRowSelectionHandler,
     dataSelectionHandler,
     calculatedSelected,
-    selectionVariant,
-    scrollLeft
+    selectionVariant
   } = props
 
   const closeHeaderTool = () => {
@@ -158,10 +156,6 @@ function MaterialHeader(props) {
     )
   }, [calculatedSelected, data])
 
-  useEffect(() => {
-    headerRef.current.scrollLeft = scrollLeft
-  }, [scrollLeft])
-
   return (
     <div
       className={clsx(
@@ -172,8 +166,6 @@ function MaterialHeader(props) {
           ? classes.mediumSpacing
           : classes.largeSpacing
       )}
-      style={{ position: 'absolute' }}
-      ref={headerRef}
     >
       {((freezeSection && freezeColumnWidth > 0) ||
         (!freezeSection && freezeColumnWidth === 0)) &&

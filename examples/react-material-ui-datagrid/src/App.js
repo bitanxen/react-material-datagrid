@@ -168,6 +168,7 @@ function App() {
         dataSelectionHandler={() => {}}
         rowsPerPageOptions={[5, 15]}
         defaultRowsPerPage={5}
+        strictBodyHeight={true}
       />
     </div>
   )

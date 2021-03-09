@@ -12,25 +12,34 @@ import _ from 'lodash'
 import useWidth from '../hooks/useWidth'
 import { breakpointQuery, newMuiTheme } from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
-import MaterialHeader from './MaterialHeader'
-import MaterialBody from './MaterialBody'
 import MaterialFooter from './MaterialFooter'
 
+import MaterialHeaderWrapper from './MaterialHeaderWrapper'
+import MaterialBodyWrapper from './MaterialBodyWrapper'
+
 const useStyles = makeStyles((theme) => ({
-  tableWrapper: {
-    display: 'flex',
-    overflow: 'hidden'
+  /*
+  '@global': {
+    '*::-webkit-scrollbar': {
+      width: '0.4em',
+      height: '0.4em'
+    },
+    '*::-webkit-scrollbar-track': {
+      '-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0.00)'
+    },
+    '*::-webkit-scrollbar-thumb': {
+      backgroundColor: theme.palette.secondary.light,
+      outline: '1px solid slategrey'
+    }
   },
-  tableFreezeSection: {
-    overflow: 'auto',
-    boxShadow: '5px 0px 1px #DDD'
+  */
+  tableWrapper: {
+    overflow: 'hidden'
   }
 }))
 
 function MaterialDataGrid(props) {
   const containerRef = useRef(null)
-  const freezeSectionRef = useRef(null)
-  const regularSectionRef = useRef(null)
   const classes = useStyles()
   const width = useWidth(containerRef)
   const [calculatedSize, setCaluclatedSize] = useState('medium')
@@ -42,9 +51,8 @@ function MaterialDataGrid(props) {
   const [calculatedPage, setCalculatedPage] = useState(1)
   const [rowPerPage, setRowPerPage] = useState(10)
   const [rowsOptions, setRowsOptions] = useState([])
-  const [freezeSectionScroll, setFreezeSectionScroll] = useState(0)
-  const [regularSectionScroll, setRegularSectionScroll] = useState(0)
-
+  const [freezeScroll, setFreezeScroll] = useState(0)
+  const [regularScroll, setRegularScroll] = useState(0)
   const {
     theme,
     className,
@@ -64,7 +72,8 @@ function MaterialDataGrid(props) {
     dataSelectionHandler,
     pagination,
     rowsPerPageOptions,
-    defaultRowsPerPage
+    defaultRowsPerPage,
+    strictBodyHeight
   } = props
 
   useEffect(() => {
@@ -409,97 +418,51 @@ function MaterialDataGrid(props) {
             />
             <div
               className={classes.tableWrapper}
-              style={{ width: `${width}px`, maxWidth: '100%' }}
+              style={{
+                width: `${width}px`,
+                maxWidth: '100%',
+                scrollBehavior: 'smooth'
+              }}
             >
-              <div
-                className={classes.tableFreezeSection}
-                style={{
-                  width: getFreezeColWidth()
-                }}
-                ref={freezeSectionRef}
-                onScroll={() => {
-                  setFreezeSectionScroll(freezeSectionRef.current.scrollLeft)
-                }}
-              >
-                <MaterialHeader
-                  tableSize={calculatedSize}
-                  header={calculatedHeader}
-                  data={calculatedData}
-                  resizeHandler={resizeHandler}
-                  freezeColumnHandler={freezeColumnHandler}
-                  freezeSection={true}
-                  freezeColumnWidth={getFreezeColWidth()}
-                  toggleShowHideColumn={toggleShowHideColumn}
-                  sorting={calculatedSorting}
-                  sortColumn={sortColumn}
-                  unsortColumn={unsortColumn}
-                  calculatedSelected={calculatedSelected}
-                  allRowSelectionHandler={allRowSelectionHandler}
-                  dataSelectionHandler={dataSelectionHandler}
-                  selectionVariant={selectionVariant}
-                  scrollLeft={freezeSectionScroll}
-                />
-                <MaterialBody
-                  tableSize={calculatedSize}
-                  freezeSection={true}
-                  freezeColumnWidth={getFreezeColWidth()}
-                  header={calculatedHeader}
-                  data={calculatedData}
-                  sorting={calculatedSorting}
-                  calculatedSelected={calculatedSelected}
-                  calculatedKeyCol={calculatedKeyCol}
-                  singleRowSelectionHandler={singleRowSelectionHandler}
-                  dataSelectionHandler={dataSelectionHandler}
-                  selectionVariant={selectionVariant}
-                  rowsPerPage={rowPerPage}
-                  page={calculatedPage}
-                />
-              </div>
-              <div
-                style={{
-                  width: getRegularColWidth(),
-                  overflow: 'auto',
-                  padding: '0 0 0 5px'
-                }}
-                ref={regularSectionRef}
-                onScroll={() => {
-                  setRegularSectionScroll(regularSectionRef.current.scrollLeft)
-                }}
-              >
-                <MaterialHeader
-                  tableSize={calculatedSize}
-                  header={calculatedHeader}
-                  data={calculatedData}
-                  resizeHandler={resizeHandler}
-                  freezeColumnHandler={freezeColumnHandler}
-                  freezeSection={false}
-                  freezeColumnWidth={getFreezeColWidth()}
-                  toggleShowHideColumn={toggleShowHideColumn}
-                  sorting={calculatedSorting}
-                  sortColumn={sortColumn}
-                  unsortColumn={unsortColumn}
-                  calculatedSelected={calculatedSelected}
-                  allRowSelectionHandler={allRowSelectionHandler}
-                  dataSelectionHandler={dataSelectionHandler}
-                  selectionVariant={selectionVariant}
-                  scrollLeft={regularSectionScroll}
-                />
-                <MaterialBody
-                  tableSize={calculatedSize}
-                  freezeSection={false}
-                  freezeColumnWidth={getFreezeColWidth()}
-                  header={calculatedHeader}
-                  data={calculatedData}
-                  sorting={calculatedSorting}
-                  calculatedSelected={calculatedSelected}
-                  calculatedKeyCol={calculatedKeyCol}
-                  singleRowSelectionHandler={singleRowSelectionHandler}
-                  dataSelectionHandler={dataSelectionHandler}
-                  selectionVariant={selectionVariant}
-                  rowsPerPage={rowPerPage}
-                  page={calculatedPage}
-                />
-              </div>
+              <MaterialHeaderWrapper
+                tableSize={calculatedSize}
+                header={calculatedHeader}
+                data={calculatedData}
+                resizeHandler={resizeHandler}
+                freezeColumnHandler={freezeColumnHandler}
+                freezeColumnWidth={getFreezeColWidth()}
+                regularColumnWidth={getRegularColWidth()}
+                toggleShowHideColumn={toggleShowHideColumn}
+                sorting={calculatedSorting}
+                sortColumn={sortColumn}
+                unsortColumn={unsortColumn}
+                calculatedSelected={calculatedSelected}
+                allRowSelectionHandler={allRowSelectionHandler}
+                dataSelectionHandler={dataSelectionHandler}
+                selectionVariant={selectionVariant}
+                freezeScroll={freezeScroll}
+                regularScroll={regularScroll}
+              />
+              <MaterialBodyWrapper
+                tableSize={calculatedSize}
+                freezeSection={false}
+                freezeColumnWidth={getFreezeColWidth()}
+                regularColumnWidth={getRegularColWidth()}
+                header={calculatedHeader}
+                data={calculatedData}
+                sorting={calculatedSorting}
+                calculatedSelected={calculatedSelected}
+                calculatedKeyCol={calculatedKeyCol}
+                singleRowSelectionHandler={singleRowSelectionHandler}
+                dataSelectionHandler={dataSelectionHandler}
+                selectionVariant={selectionVariant}
+                rowsPerPage={rowPerPage}
+                page={calculatedPage}
+                freezeScrollHandler={setFreezeScroll}
+                regularScrollHandler={setRegularScroll}
+                strictBodyHeight={strictBodyHeight}
+                defaultRowsPerPage={defaultRowsPerPage}
+              />
             </div>
             <MaterialFooter
               page={calculatedPage}
