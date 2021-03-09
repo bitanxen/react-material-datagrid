@@ -5,9 +5,10 @@ import {
   FirstPage,
   LastPage
 } from '@material-ui/icons'
-import { range } from '../../utils/ApplicationUtils'
 import { makeStyles, IconButton } from '@material-ui/core'
 import clsx from 'clsx'
+
+import { range } from '../../utils/ApplicationUtils'
 
 const useStyles = makeStyles((theme) => ({
   paginationRoot: {

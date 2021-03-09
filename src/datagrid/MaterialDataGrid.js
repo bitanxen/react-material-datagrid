@@ -10,7 +10,6 @@ import {
 import _ from 'lodash'
 
 import useWidth from '../hooks/useWidth'
-import useScroll from '../hooks/useScroll'
 import { breakpointQuery, newMuiTheme } from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
 import MaterialHeader from './MaterialHeader'

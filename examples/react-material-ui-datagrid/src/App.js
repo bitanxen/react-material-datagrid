@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { MaterialDataGrid } from 'react-material-datagrid'
 import { Add, Delete } from '@material-ui/icons'
 import './style.css'
-import { IconButton } from '@material-ui/core'
 
 function App() {
   const [data, setData] = useState([])
