@@ -9,6 +9,8 @@ function MaterialHeaderWrapper(props) {
     tableSize,
     header,
     data,
+    settingsProps,
+    filterable,
     resizeHandler,
     freezeColumnHandler,
     freezeColumnWidth,
@@ -47,6 +49,8 @@ function MaterialHeaderWrapper(props) {
           tableSize={tableSize}
           header={header}
           data={data}
+          settingsProps={settingsProps}
+          filterable={filterable}
           resizeHandler={resizeHandler}
           freezeColumnHandler={freezeColumnHandler}
           freezeSection={true}
@@ -69,6 +73,8 @@ function MaterialHeaderWrapper(props) {
           tableSize={tableSize}
           header={header}
           data={data}
+          settingsProps={settingsProps}
+          filterable={filterable}
           resizeHandler={resizeHandler}
           freezeColumnHandler={freezeColumnHandler}
           freezeSection={false}

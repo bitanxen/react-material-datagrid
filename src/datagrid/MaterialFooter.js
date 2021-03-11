@@ -40,11 +40,13 @@ function MaterialFooter(props) {
     page,
     rowPerPage,
     data,
+    totalRecord,
     boundaryCount,
     siblingCount,
     changePage,
     changeRowPerPage,
-    rowsOptions
+    rowsOptions,
+    showSelectedData
   } = props
   const classes = useStyles()
 
@@ -89,7 +91,14 @@ function MaterialFooter(props) {
         <div
           style={{ display: 'flex', alignItems: 'center', marginLeft: '15px' }}
         >
-          {data.length} records
+          {showSelectedData ? (
+            <>
+              Showing {data.length} selected record out of {totalRecord} total
+              record
+            </>
+          ) : (
+            <>Total {data.length} records</>
+          )}
         </div>
       </div>
     </div>

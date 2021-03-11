@@ -5,6 +5,7 @@ import MaterialBody from './MaterialBody'
 function MaterialBodyWrapper(props) {
   const regularRef = useRef(null)
   const freezeRef = useRef(null)
+
   const {
     tableSize,
     freezeColumnWidth,
@@ -29,19 +30,29 @@ function MaterialBodyWrapper(props) {
       return 'auto'
     }
 
-    return defaultRowsPerPage * 40
+    return defaultRowsPerPage * 40 + 17
   }
 
   return (
-    <div style={{ width: '100%', display: 'flex', maxHeight: getBodyHeight() }}>
+    <div
+      style={{
+        width: '100%',
+        display: 'flex',
+        height: getBodyHeight(),
+        maxHeight: getBodyHeight()
+      }}
+    >
       <div
         style={{
-          overflow: 'auto',
+          overflowX: 'auto',
+          overflowY: 'hidden',
           width: freezeColumnWidth,
           boxShadow: '3px 0px 1px #DDD'
         }}
         ref={freezeRef}
-        onScroll={() => freezeScrollHandler(freezeRef.current.scrollLeft)}
+        onScroll={() => {
+          freezeScrollHandler(freezeRef.current.scrollLeft)
+        }}
       >
         <MaterialBody
           tableSize={tableSize}
@@ -61,7 +72,10 @@ function MaterialBodyWrapper(props) {
       <div
         style={{ overflow: 'auto', width: regularColumnWidth }}
         ref={regularRef}
-        onScroll={() => regularScrollHandler(regularRef.current.scrollLeft)}
+        onScroll={() => {
+          freezeRef.current.scrollTop = regularRef.current.scrollTop
+          regularScrollHandler(regularRef.current.scrollLeft)
+        }}
       >
         <MaterialBody
           tableSize={tableSize}
