@@ -45,6 +45,7 @@ function MaterialDataGrid(props) {
   const [calculatedSize, setCaluclatedSize] = useState('medium')
   const [calculatedHeader, setCalculatedHeader] = useState([])
   const [calculatedData, setCalculatedData] = useState([])
+  const [viewableData, setViewableData] = useState([])
   const [calculatedSorting, setCalculatedSorting] = useState(null)
   const [calculatedSelected, setCalculatedSelected] = useState(null)
   const [calculatedKeyCol, setCalculatedKeyCol] = useState(null)
@@ -53,6 +54,8 @@ function MaterialDataGrid(props) {
   const [rowsOptions, setRowsOptions] = useState([])
   const [freezeScroll, setFreezeScroll] = useState(0)
   const [regularScroll, setRegularScroll] = useState(0)
+  const [showSelectedData, setShowSelectedData] = useState(false)
+
   const {
     theme,
     className,
@@ -190,6 +193,27 @@ function MaterialDataGrid(props) {
   useEffect(() => {
     setCalculatedData(prepareData)
   }, [prepareData])
+
+  useEffect(() => {
+    if (showSelectedData) {
+      setViewableData(calculatedSelected)
+      setCalculatedPage(1)
+      return
+    }
+
+    setViewableData(calculatedData)
+  }, [calculatedData, showSelectedData, calculatedSelected])
+
+  useEffect(() => {
+    if (
+      showSelectedData &&
+      calculatedSelected &&
+      calculatedSelected.length === 0
+    ) {
+      setShowSelectedData(false)
+      setCalculatedPage(1)
+    }
+  }, [calculatedSelected, showSelectedData])
 
   useEffect(() => {
     if (calculatedData.length === 0) {
@@ -349,10 +373,10 @@ function MaterialDataGrid(props) {
       if (regularWidth > remaining) {
         return maxLimit
       } else {
-        return freezeWidth + 45
+        return freezeWidth + 47
       }
     } else {
-      return freezeWidth + 45
+      return freezeWidth + 47
     }
   }
 
@@ -415,19 +439,22 @@ function MaterialDataGrid(props) {
               toggleShowHideColumn={toggleShowHideColumn}
               columnReorderHandler={columnReorder}
               calculatedSelected={calculatedSelected}
+              showSelectedData={showSelectedData}
+              showSelectedDataHandler={setShowSelectedData}
             />
             <div
               className={classes.tableWrapper}
               style={{
                 width: `${width}px`,
-                maxWidth: '100%',
-                scrollBehavior: 'smooth'
+                maxWidth: '100%'
               }}
             >
               <MaterialHeaderWrapper
                 tableSize={calculatedSize}
                 header={calculatedHeader}
-                data={calculatedData}
+                data={viewableData}
+                settingsProps={settingsProps}
+                filterable={filterable}
                 resizeHandler={resizeHandler}
                 freezeColumnHandler={freezeColumnHandler}
                 freezeColumnWidth={getFreezeColWidth()}
@@ -449,7 +476,7 @@ function MaterialDataGrid(props) {
                 freezeColumnWidth={getFreezeColWidth()}
                 regularColumnWidth={getRegularColWidth()}
                 header={calculatedHeader}
-                data={calculatedData}
+                data={viewableData}
                 sorting={calculatedSorting}
                 calculatedSelected={calculatedSelected}
                 calculatedKeyCol={calculatedKeyCol}
@@ -467,7 +494,8 @@ function MaterialDataGrid(props) {
             <MaterialFooter
               page={calculatedPage}
               rowPerPage={rowPerPage}
-              data={calculatedData}
+              data={viewableData}
+              totalRecord={calculatedData.length}
               boundaryCount={1}
               siblingCount={width > 800 ? 1 : 0}
               changePage={changePage}
@@ -475,6 +503,7 @@ function MaterialDataGrid(props) {
               pagination={pagination}
               changeRowPerPage={changeRowPerPage}
               rowsOptions={rowsOptions}
+              showSelectedData={showSelectedData}
             />
           </Paper>
         </div>
@@ -535,6 +564,7 @@ MaterialDataGrid.propTypes = {
       icon: PropTypes.any,
       avaterText: PropTypes.string,
       avaterSrc: PropTypes.any,
+      freezable: PropTypes.bool,
       freeze: PropTypes.bool,
       display: PropTypes.bool,
       resize: PropTypes.bool,

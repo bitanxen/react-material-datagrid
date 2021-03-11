@@ -21,6 +21,7 @@ import {
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 import { Resizable } from 'react-resizable'
+import { isSortable } from '../utils/ApplicationUtils'
 
 const useStyles = makeStyles((theme) => ({
   headerRoot: {
@@ -116,6 +117,8 @@ function MaterialHeader(props) {
     tableSize,
     header,
     data,
+    settingsProps,
+    filterable,
     resizeHandler,
     freezeColumnHandler,
     freezeSection,
@@ -171,7 +174,7 @@ function MaterialHeader(props) {
         (!freezeSection && freezeColumnWidth === 0)) &&
         (dataSelectionHandler || calculatedSelected) &&
         checked !== null && (
-          <div className={classes.headerCell} style={{ width: '45px' }}>
+          <div className={classes.headerCell} style={{ minWidth: '45px' }}>
             <Checkbox
               checked={checked}
               indeterminate={indeterminate}
@@ -193,14 +196,23 @@ function MaterialHeader(props) {
             height={40}
             maxConstraints={h.maxWidth ? [h.maxWidth, 40] : undefined}
             resizeHandles={['e']}
-            handle={h.resize && <span className={classes.verticalLine} />}
+            handle={
+              ((settingsProps.resizeColumn && h.resize !== false) ||
+                (!settingsProps.resizeColumn && h.resize)) && (
+                <span className={classes.verticalLine} />
+              )
+            }
             handleSize={[15, 15]}
             onResize={(e, resize) => resizeHandler(h, e, resize)}
           >
             <div className={classes.headerCell}>
               <div
                 style={{ display: 'flex', cursor: 'pointer' }}
-                onClick={() => sortColumn(h)}
+                onClick={() => {
+                  if (settingsProps.ordering && isSortable(h)) {
+                    sortColumn(h)
+                  }
+                }}
               >
                 <div
                   className={classes.headerCellInfo}
@@ -224,24 +236,32 @@ function MaterialHeader(props) {
                 </div>
               </div>
               <div className={clsx(classes.headerTools, classes.hoverShow)}>
-                <IconButton
-                  aria-label="Column Freezed"
-                  size="small"
-                  className={clsx(
-                    classes.menuIconDisplay,
-                    !h.freeze ? classes.defaultHide : classes.defaultShow
-                  )}
-                  onClick={() => freezeColumnHandler(h.colId)}
-                >
-                  <Lock fontSize="inherit" />
-                </IconButton>
-                <IconButton
-                  aria-label="Column Filtered"
-                  size="small"
-                  className={clsx(classes.defaultHide, classes.menuIconDisplay)}
-                >
-                  <FilterList fontSize="inherit" />
-                </IconButton>
+                {((settingsProps.freezeColumm && h.freezable !== false) ||
+                  (!settingsProps.freezeColumm && h.freezable)) && (
+                  <IconButton
+                    aria-label="Column Freezed"
+                    size="small"
+                    className={clsx(
+                      classes.menuIconDisplay,
+                      !h.freeze ? classes.defaultHide : classes.defaultShow
+                    )}
+                    onClick={() => freezeColumnHandler(h.colId)}
+                  >
+                    <Lock fontSize="inherit" />
+                  </IconButton>
+                )}
+                {filterable && (
+                  <IconButton
+                    aria-label="Column Filtered"
+                    size="small"
+                    className={clsx(
+                      classes.defaultHide,
+                      classes.menuIconDisplay
+                    )}
+                  >
+                    <FilterList fontSize="inherit" />
+                  </IconButton>
+                )}
                 <IconButton
                   aria-label="Column Settings"
                   size="small"
@@ -267,60 +287,69 @@ function MaterialHeader(props) {
           horizontal: 'center'
         }}
       >
-        {sorting && (
-          <MenuItem
-            onClick={() => {
-              unsortColumn()
-              closeHeaderTool()
-            }}
-            className={classes.menuItem}
-          >
-            <ListItemIcon className={classes.menuIcon}>
-              <Clear fontSize="small" />
-            </ListItemIcon>
-            <ListItemText disableTypography primary="Unsort" />
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            if (headerTools && headerTools.header) {
-              sortColumn(headerTools.header)
-            }
-            closeHeaderTool()
-          }}
-          className={classes.menuItem}
-          disabled={
-            headerTools &&
-            headerTools.header &&
-            sorting &&
-            sorting.order === 'desc'
-          }
-        >
-          <ListItemIcon className={classes.menuIcon}>
-            <ArrowUpwardSharp fontSize="small" />
-          </ListItemIcon>
-          <ListItemText disableTypography primary="Order ASC" />
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (headerTools && headerTools.header) {
-              sortColumn(headerTools.header)
-            }
-            closeHeaderTool()
-          }}
-          className={classes.menuItem}
-          disabled={
-            headerTools &&
-            headerTools.header &&
-            sorting &&
-            sorting.order === 'asc'
-          }
-        >
-          <ListItemIcon className={classes.menuIcon}>
-            <ArrowDownwardSharp fontSize="small" />
-          </ListItemIcon>
-          <ListItemText disableTypography primary="Order DESC" />
-        </MenuItem>
+        {headerTools &&
+          headerTools.header &&
+          settingsProps.ordering &&
+          isSortable(headerTools.header) && (
+            <>
+              {sorting && (
+                <MenuItem
+                  onClick={() => {
+                    unsortColumn()
+                    closeHeaderTool()
+                  }}
+                  className={classes.menuItem}
+                >
+                  <ListItemIcon className={classes.menuIcon}>
+                    <Clear fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText disableTypography primary="Unsort" />
+                </MenuItem>
+              )}
+              <MenuItem
+                onClick={() => {
+                  if (headerTools && headerTools.header) {
+                    sortColumn(headerTools.header)
+                  }
+                  closeHeaderTool()
+                }}
+                className={classes.menuItem}
+                disabled={
+                  headerTools &&
+                  headerTools.header &&
+                  sorting &&
+                  sorting.order === 'desc' &&
+                  headerTools.header.colId === sorting.property
+                }
+              >
+                <ListItemIcon className={classes.menuIcon}>
+                  <ArrowUpwardSharp fontSize="small" />
+                </ListItemIcon>
+                <ListItemText disableTypography primary="Order ASC" />
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  if (headerTools && headerTools.header) {
+                    sortColumn(headerTools.header)
+                  }
+                  closeHeaderTool()
+                }}
+                className={classes.menuItem}
+                disabled={
+                  headerTools &&
+                  headerTools.header &&
+                  sorting &&
+                  sorting.order === 'asc' &&
+                  headerTools.header.colId === sorting.property
+                }
+              >
+                <ListItemIcon className={classes.menuIcon}>
+                  <ArrowDownwardSharp fontSize="small" />
+                </ListItemIcon>
+                <ListItemText disableTypography primary="Order DESC" />
+              </MenuItem>
+            </>
+          )}
         <MenuItem
           onClick={() => {
             if (headerTools && headerTools.header) {

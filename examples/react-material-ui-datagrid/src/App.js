@@ -27,6 +27,20 @@ function App() {
         )
       })
   }, [])
+
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        '*': {
+          'scrollbar-width': 'thin',
+        },
+        '*::-webkit-scrollbar': {
+          width: '4px',
+          height: '4px',
+        }
+      }
+    }
+  }
  */
 
   useEffect(() => {
@@ -85,7 +99,9 @@ function App() {
             avaterSrc: (data) => {
               //console.log(data)
               return data.picture
-            }
+            },
+            freezable: true,
+            freeze: false
           },
           {
             colId: 'email',
@@ -164,11 +180,16 @@ function App() {
           }
         ]}
         dataSelected={['1', '2', '7']}
-        selectionVariant="single"
+        selectionVariant="multi"
         dataSelectionHandler={() => {}}
         rowsPerPageOptions={[5, 15]}
         defaultRowsPerPage={5}
         strictBodyHeight={true}
+        settingsProps={{
+          ordering: false,
+          freezeColumm: true,
+          resizeColumn: true
+        }}
       />
     </div>
   )

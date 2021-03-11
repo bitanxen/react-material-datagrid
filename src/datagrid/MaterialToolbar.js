@@ -58,6 +58,10 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(0.5),
     marginRight: theme.spacing(0.5),
     fontSize: 24
+  },
+  showSelectedData: {
+    textDecoration: 'underline',
+    color: theme.palette.secondary.main
   }
 }))
 
@@ -79,7 +83,9 @@ function MaterialToolbar(props) {
     header,
     toggleShowHideColumn,
     columnReorderHandler,
-    calculatedSelected
+    calculatedSelected,
+    showSelectedData,
+    showSelectedDataHandler
   } = props
 
   const openHiddenTools = (event) => {
@@ -163,7 +169,16 @@ function MaterialToolbar(props) {
         <Typography className={classes.tableInfoText} variant="h5">
           {tableName}{' '}
           {calculatedSelected && calculatedSelected.length > 0 && (
-            <>: {calculatedSelected.length} selected</>
+            <>
+              {' : '}
+              <span
+                onClick={() => showSelectedDataHandler(!showSelectedData)}
+                style={{ cursor: 'pointer' }}
+                className={showSelectedData ? classes.showSelectedData : ''}
+              >
+                {calculatedSelected.length} selected
+              </span>
+            </>
           )}
         </Typography>
       </div>
@@ -288,7 +303,9 @@ MaterialToolbar.propTypes = {
   header: PropTypes.array.isRequired,
   toggleShowHideColumn: PropTypes.func.isRequired,
   columnReorderHandler: PropTypes.func.isRequired,
-  calculatedSelected: PropTypes.any
+  calculatedSelected: PropTypes.any,
+  showSelectedData: PropTypes.bool.isRequired,
+  showSelectedDataHandler: PropTypes.func.isRequired
 }
 
 export default MaterialToolbar
