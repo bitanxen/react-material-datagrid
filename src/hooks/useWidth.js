@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import dataGridService from '../service/DataGridService'
 
 export default function useWidth(elementRef) {
   const [width, setWidth] = useState(null)
@@ -16,6 +17,14 @@ export default function useWidth(elementRef) {
     return () => {
       window.removeEventListener('resize', updateWidth)
     }
+  }, [updateWidth])
+
+  useEffect(() => {
+    dataGridService.on('resize', () => {
+      setTimeout(() => {
+        updateWidth()
+      }, 500)
+    })
   }, [updateWidth])
 
   return width

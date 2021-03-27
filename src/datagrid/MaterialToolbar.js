@@ -56,8 +56,7 @@ const useStyles = makeStyles((theme) => ({
   },
   visibleMenuIcons: {
     marginLeft: theme.spacing(0.5),
-    marginRight: theme.spacing(0.5),
-    fontSize: 24
+    marginRight: theme.spacing(0.5)
   },
   showSelectedData: {
     textDecoration: 'underline',
@@ -188,9 +187,9 @@ function MaterialToolbar(props) {
           .map((tool, index) => (
             <IconButton
               color={toolIconColor}
+              size="medium"
               key={index}
               aria-label={tool.name}
-              size={tableSize === 'small' ? tableSize : 'medium'}
               className={classes.visibleMenuIcons}
               onClick={(e) => tool.clickHandler(e, calculatedSelected)}
             >
@@ -203,7 +202,7 @@ function MaterialToolbar(props) {
             <IconButton
               color={toolIconColor}
               aria-label="More"
-              size={tableSize === 'small' ? tableSize : 'medium'}
+              size="medium"
               onClick={openHiddenTools}
               className={classes.visibleMenuIcons}
             >
@@ -239,11 +238,7 @@ function MaterialToolbar(props) {
                       >
                         <tool.icon fontSize="small" />
                       </ListItemIcon>
-                      <ListItemText
-                        disableTypography
-                        className="pl-0"
-                        primary={tool.name}
-                      />
+                      <ListItemText disableTypography primary={tool.name} />
                     </MenuItem>
                   </React.Fragment>
                 ))}

@@ -148,7 +148,9 @@ function MaterialHeader(props) {
   }
 
   useEffect(() => {
-    setChecked(calculatedSelected && calculatedSelected.length === data.length)
+    setChecked(
+      calculatedSelected ? calculatedSelected.length === data.length : false
+    )
   }, [calculatedSelected, data])
 
   useEffect(() => {
@@ -192,7 +194,11 @@ function MaterialHeader(props) {
             key={index}
             className={classes.headerCells}
             width={h.targetWidth}
-            style={{ minWidth: h.minWidth, width: h.targetWidth }}
+            style={{
+              minWidth: h.minWidth,
+              width: h.targetWidth,
+              transition: 'width 0.5s ease-in-out'
+            }}
             height={40}
             maxConstraints={h.maxWidth ? [h.maxWidth, 40] : undefined}
             resizeHandles={['e']}

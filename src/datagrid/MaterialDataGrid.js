@@ -10,6 +10,7 @@ import {
 import _ from 'lodash'
 
 import useWidth from '../hooks/useWidth'
+import usePrevious from '../hooks/usePrevious'
 import { breakpointQuery, newMuiTheme } from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
 import MaterialFooter from './MaterialFooter'
@@ -35,6 +36,9 @@ const useStyles = makeStyles((theme) => ({
   */
   tableWrapper: {
     overflow: 'hidden'
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper
   }
 }))
 
@@ -42,6 +46,7 @@ function MaterialDataGrid(props) {
   const containerRef = useRef(null)
   const classes = useStyles()
   const width = useWidth(containerRef)
+  const previousWidth = usePrevious(width)
   const [calculatedSize, setCaluclatedSize] = useState('medium')
   const [calculatedHeader, setCalculatedHeader] = useState([])
   const [calculatedData, setCalculatedData] = useState([])
@@ -110,7 +115,7 @@ function MaterialDataGrid(props) {
 
       const fitCompletedArray = calculatedHeader.filter((h) => h.fitDone)
       if (
-        fitCompletedArray.length === 0 &&
+        (fitCompletedArray.length === 0 || previousWidth !== width) &&
         totalColumnWidth > 0 &&
         totalColumnWidth < width
       ) {
@@ -139,6 +144,7 @@ function MaterialDataGrid(props) {
     }
   }, [
     width,
+    previousWidth,
     fitColumns,
     calculatedHeader,
     dataSelectionHandler,
@@ -146,6 +152,9 @@ function MaterialDataGrid(props) {
   ])
 
   useEffect(() => {
+    if (calculatedHeader.length !== 0) {
+      return
+    }
     const preparedHeader = header.map((h) => {
       h.width = h.width ? h.width : 100
       h.minWidth = h.width + 125
@@ -170,7 +179,7 @@ function MaterialDataGrid(props) {
     }
 
     setCalculatedHeader(preparedHeader)
-  }, [header])
+  }, [header, calculatedHeader])
 
   useEffect(() => {
     refitColumns()
@@ -333,7 +342,8 @@ function MaterialDataGrid(props) {
         setCalculatedSelected(selected)
         dataSelectionHandler(selected)
       } else {
-        const selected = [...calculatedSelected, row]
+        const selected =
+          calculatedSelected !== null ? [...calculatedSelected, row] : [row]
         setCalculatedSelected(selected)
         dataSelectionHandler(selected)
       }
@@ -369,14 +379,16 @@ function MaterialDataGrid(props) {
     const maxLimit = (width * 60) / 100
     const remaining = width - maxLimit
 
+    const checkBoxSize = dataSelectionHandler || calculatedSelected ? 47 : 0
+
     if (freezeWidth > maxLimit) {
       if (regularWidth > remaining) {
         return maxLimit
       } else {
-        return freezeWidth + 47
+        return freezeWidth + checkBoxSize
       }
     } else {
-      return freezeWidth + 47
+      return freezeWidth + checkBoxSize
     }
   }
 
@@ -420,7 +432,7 @@ function MaterialDataGrid(props) {
     <StylesProvider generateClassName={createGenerateClassName()}>
       <ThemeProvider theme={theme || newMuiTheme()}>
         <div ref={containerRef} className={className}>
-          <Paper style={{ backgroundColor: 'transparent' }}>
+          <Paper className={classes.paper}>
             <MaterialToolbar
               tableName={tableName}
               tableSize={calculatedSize}
@@ -446,7 +458,8 @@ function MaterialDataGrid(props) {
               className={classes.tableWrapper}
               style={{
                 width: `${width}px`,
-                maxWidth: '100%'
+                maxWidth: '100%',
+                transition: 'width 0.5s ease-in-out'
               }}
             >
               <MaterialHeaderWrapper

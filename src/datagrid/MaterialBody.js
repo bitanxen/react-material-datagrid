@@ -97,13 +97,13 @@ function MaterialBody(props) {
                           ? h.backgroundColor(row)
                           : h.backgroundColor
                         : 'transparent',
-                      color: theme.palette.getContrastText(
-                        h.backgroundColor
-                          ? typeof h.backgroundColor === 'function'
-                            ? h.backgroundColor(row)
-                            : h.backgroundColor
-                          : '#FFFFFF'
-                      )
+                      color: h.backgroundColor
+                        ? theme.palette.getContrastText(
+                            typeof h.backgroundColor === 'function'
+                              ? h.backgroundColor(row)
+                              : h.backgroundColor
+                          )
+                        : 'auto'
                     }}
                     key={h.colId}
                   >

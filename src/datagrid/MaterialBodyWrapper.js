@@ -47,7 +47,8 @@ function MaterialBodyWrapper(props) {
           overflowX: 'auto',
           overflowY: 'hidden',
           width: freezeColumnWidth,
-          boxShadow: '3px 0px 1px #DDD'
+          boxShadow: '3px 0px 1px #DDD',
+          transition: 'width 0.5s ease-in-out'
         }}
         ref={freezeRef}
         onScroll={() => {
@@ -70,7 +71,11 @@ function MaterialBodyWrapper(props) {
         />
       </div>
       <div
-        style={{ overflow: 'auto', width: regularColumnWidth }}
+        style={{
+          overflow: 'auto',
+          width: regularColumnWidth,
+          transition: 'width 0.5s ease-in-out'
+        }}
         ref={regularRef}
         onScroll={() => {
           freezeRef.current.scrollTop = regularRef.current.scrollTop
