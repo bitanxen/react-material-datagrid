@@ -5,10 +5,12 @@ import {
   makeStyles,
   Typography,
   Avatar,
-  Checkbox
+  Checkbox,
+  Button
 } from '@material-ui/core'
 
 import { stableSort, getSorting } from '../utils/ApplicationUtils'
+import clsx from 'clsx'
 
 const useStyles = makeStyles((theme) => ({
   bodyWrapper: {
@@ -33,6 +35,12 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
+  },
+  cellCenter: {
+    textAlign: 'center'
+  },
+  cellButton: {
+    lineHeight: 'normal'
   }
 }))
 
@@ -61,6 +69,90 @@ function MaterialBody(props) {
           )
         : []
     return isSelectedArray.length > 0
+  }
+
+  const getCellData = (row, header) => {
+    switch (header.dataType) {
+      case 'number': {
+        return (
+          <div
+            onClick={
+              header.clickHandler && typeof header.clickHandler === 'function'
+                ? () => {
+                    header.clickHandler(row, header)
+                  }
+                : undefined
+            }
+            style={{ cursor: header.clickHandler ? 'pointer' : 'auto' }}
+          >
+            <Typography
+              className={clsx(classes.cellValue, classes.cellCenter)}
+              variant="body2"
+              color={header.clickHandler ? 'primary' : 'inherit'}
+            >
+              {row[header.colId]}
+            </Typography>
+          </div>
+        )
+      }
+      case 'boolean': {
+        return (
+          <div
+            onClick={
+              header.clickHandler && typeof header.clickHandler === 'function'
+                ? () => {
+                    header.clickHandler(row, header)
+                  }
+                : undefined
+            }
+            style={{ cursor: header.clickHandler ? 'pointer' : 'auto' }}
+          >
+            <Typography
+              className={clsx(classes.cellValue, classes.cellCenter)}
+              variant="body2"
+              color={header.clickHandler ? 'primary' : 'inherit'}
+            >
+              {row[header.colId] ? 'Yes' : 'No'}
+            </Typography>
+          </div>
+        )
+      }
+      case 'button': {
+        return (
+          <div className={classes.cellCenter}>
+            <Button
+              className={clsx(classes.cellValue, classes.cellButton)}
+              size="small"
+              color={header.buttonColor ? header.buttonColor : 'default'}
+              variant={header.buttonVariant ? header.buttonVariant : 'outlined'}
+              onClick={
+                header.clickHandler && typeof header.clickHandler === 'function'
+                  ? () => {
+                      header.clickHandler(row, header)
+                    }
+                  : undefined
+              }
+            >
+              {row[header.colId] ? 'Yes' : 'No'}
+            </Button>
+          </div>
+        )
+      }
+      case 'other': {
+        ;<div
+          onClick={
+            header.clickHandler && typeof header.clickHandler === 'function'
+              ? () => {
+                  header.clickHandler(row, header)
+                }
+              : undefined
+          }
+          style={{ cursor: header.clickHandler ? 'pointer' : 'auto' }}
+        >
+          {row[header.colId]}
+        </div>
+      }
+    }
   }
 
   return (
@@ -124,12 +216,34 @@ function MaterialBody(props) {
                       }}
                     >
                       <div style={{ margin: 'auto 0', width: '100%' }}>
-                        <Typography
-                          className={classes.cellValue}
-                          variant="body2"
-                        >
-                          {row[h.colId]}
-                        </Typography>
+                        {!h.dataType ||
+                        h.dataType === 'string' ||
+                        h.dataType === 'date' ||
+                        h.dataType === 'datetime' ? (
+                          <div
+                            onClick={
+                              h.clickHandler &&
+                              typeof h.clickHandler === 'function'
+                                ? () => {
+                                    h.clickHandler(row, h)
+                                  }
+                                : undefined
+                            }
+                            style={{
+                              cursor: h.clickHandler ? 'pointer' : 'auto'
+                            }}
+                          >
+                            <Typography
+                              className={classes.cellValue}
+                              variant="body2"
+                              color={h.clickHandler ? 'textPrimary' : 'inherit'}
+                            >
+                              {row[h.colId]}
+                            </Typography>
+                          </div>
+                        ) : (
+                          <>{getCellData(row, h)}</>
+                        )}
                       </div>
                       {h.icon && (
                         <div>

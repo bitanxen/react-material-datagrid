@@ -197,7 +197,8 @@ function MaterialHeader(props) {
             style={{
               minWidth: h.minWidth,
               width: h.targetWidth,
-              transition: 'width 0.5s ease-in-out'
+              transition: 'width 0.5s ease-in-out',
+              position: 'relative'
             }}
             height={40}
             maxConstraints={h.maxWidth ? [h.maxWidth, 40] : undefined}
@@ -213,35 +214,60 @@ function MaterialHeader(props) {
           >
             <div className={classes.headerCell}>
               <div
-                style={{ display: 'flex', cursor: 'pointer' }}
-                onClick={() => {
-                  if (settingsProps.ordering && isSortable(h)) {
-                    sortColumn(h)
-                  }
+                style={{
+                  display: 'flex',
+                  textAlign:
+                    h.dataType === 'number' ||
+                    h.dataType === 'boolean' ||
+                    h.dataType === 'button' ||
+                    h.dataType === 'other'
+                      ? 'center'
+                      : 'left',
+                  width: '100%'
                 }}
               >
                 <div
                   className={classes.headerCellInfo}
-                  style={{ width: h.targetWidth - 120 }}
+                  style={{ width: h.targetWidth }}
                 >
                   <Typography className={classes.headerText} variant="body2">
                     {h.colName}
                   </Typography>
                 </div>
-
-                <div className={classes.headerOrder}>
-                  {sorting && sorting.property === h.colId && (
-                    <>
-                      {sorting.order === 'desc' ? (
-                        <ArrowUpwardSharp fontSize="small" />
-                      ) : (
-                        <ArrowDownwardSharp fontSize="small" />
-                      )}
-                    </>
-                  )}
-                </div>
               </div>
-              <div className={clsx(classes.headerTools, classes.hoverShow)}>
+              <div
+                className={clsx(classes.headerTools, classes.hoverShow)}
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  margin: 'auto 15px auto auto',
+                  height: '100%'
+                }}
+              >
+                {sorting && (
+                  <IconButton
+                    aria-label="Column Freezed"
+                    size="small"
+                    className={clsx(
+                      classes.menuIconDisplay,
+                      sorting.property === h.colId
+                        ? classes.defaultShow
+                        : classes.defaultHide
+                    )}
+                    disabled={!settingsProps.ordering}
+                    onClick={() => {
+                      if (isSortable(h)) {
+                        sortColumn(h)
+                      }
+                    }}
+                  >
+                    {sorting.order === 'desc' ? (
+                      <ArrowUpwardSharp fontSize="small" />
+                    ) : (
+                      <ArrowDownwardSharp fontSize="small" />
+                    )}
+                  </IconButton>
+                )}
                 {((settingsProps.freezeColumm && h.freezable !== false) ||
                   (!settingsProps.freezeColumm && h.freezable)) && (
                   <IconButton

@@ -562,9 +562,8 @@ MaterialDataGrid.propTypes = {
         'boolean',
         'date',
         'datetime',
-        'icon',
         'button',
-        'avater'
+        'other'
       ]),
       backgroundColor: PropTypes.any,
       buttonVariant: PropTypes.oneOf(['contained', 'outlined', 'text']),
@@ -583,6 +582,7 @@ MaterialDataGrid.propTypes = {
       resize: PropTypes.bool,
       width: PropTypes.number,
       maxWidth: PropTypes.number,
+      clickHandler: PropTypes.function,
       sort: PropTypes.oneOf(['asc', 'desc'])
     })
   ).isRequired,

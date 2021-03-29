@@ -72,9 +72,8 @@ function App() {
     console.log(selectedData)
   }
 
-  return (
-    <div className="App" style={{ display: 'flex' }}>
-      <div style={{ width: toggle ? '30%' : '10%' }}>
+  /*
+<div style={{ width: toggle ? '30%' : '10%' }}>
         <button
           onClick={() => {
             setToggle(!toggle)
@@ -84,7 +83,12 @@ function App() {
           Toggle
         </button>
       </div>
-      <div style={{ width: toggle ? '70%' : '90%' }}>
+      toggle ? '70%' : '90%'
+  */
+
+  return (
+    <div className="App" style={{ display: 'flex' }}>
+      <div style={{ width: '100%' }}>
         <MaterialDataGrid
           tableName="Material UI Table"
           header={[
@@ -106,6 +110,9 @@ function App() {
               maxWidth: 350,
               resize: true,
               backgroundColor: '#f0f0f0',
+              clickHandler: (data, header) => {
+                console.log(data)
+              },
               sort: 'asc',
               avaterText: 'Hello',
               avaterSrc: (data) => {
@@ -122,9 +129,23 @@ function App() {
               display: true,
               resize: true,
               width: 150,
+              clickHandler: () => {},
               icon: Delete
-            }
-            /*,
+            },
+            {
+              colId: 'edit',
+              colName: 'Edit',
+              dataType: 'button',
+              dataValue: (data) => `${data.firstName} ${data.lastName}`,
+              buttonColor: 'secondary',
+              buttonVariant: 'contained',
+              clickHandler: (data, header) => {
+                console.log(data)
+              },
+              display: true,
+              resize: true,
+              width: 150
+            },
             {
               colId: 'phone',
               colName: 'Phone',
@@ -137,6 +158,9 @@ function App() {
               colName: 'Age',
               dataType: 'number',
               display: true,
+              clickHandler: (data, header) => {
+                console.log(data)
+              },
               backgroundColor: (data) =>
                 data.age > 70
                   ? '#987887'
@@ -174,7 +198,7 @@ function App() {
               dataType: 'string',
               display: true,
               width: 350
-            }*/
+            }
           ]}
           fitColumns={true}
           data={data}
@@ -202,7 +226,7 @@ function App() {
           defaultRowsPerPage={5}
           strictBodyHeight={true}
           settingsProps={{
-            ordering: false,
+            ordering: true,
             freezeColumm: true,
             resizeColumn: true
           }}
