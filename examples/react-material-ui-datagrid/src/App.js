@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { MaterialDataGrid, dataGridService } from 'react-material-datagrid'
+import { MaterialDataGrid } from 'react-material-datagrid'
 import { Add, Delete } from '@material-ui/icons'
 import './style.css'
+import { Button } from '@material-ui/core'
 
 function App() {
   const [data, setData] = useState([])
-  const [toggle, setToggle] = useState(true)
 
   /*
  useEffect(() => {
@@ -137,7 +137,7 @@ function App() {
               colName: 'Edit',
               dataType: 'button',
               dataValue: (data) => `${data.firstName} ${data.lastName}`,
-              buttonColor: 'secondary',
+              buttonColor: 'primary',
               buttonVariant: 'contained',
               clickHandler: (data, header) => {
                 console.log(data)
@@ -149,7 +149,7 @@ function App() {
             {
               colId: 'phone',
               colName: 'Phone',
-              dataType: 'string',
+              dataType: 'boolean',
               display: true,
               width: 150
             },
@@ -226,10 +226,41 @@ function App() {
           defaultRowsPerPage={5}
           strictBodyHeight={true}
           settingsProps={{
+            searchable: true,
+            filterable: true,
             ordering: true,
             freezeColumm: true,
             resizeColumn: true
           }}
+          tableBottomActions={(data) => (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                padding: '10px'
+              }}
+            >
+              <div style={{}}>
+                <Button
+                  disabled={!data || data.length === 0}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Start
+                </Button>
+              </div>
+              <div>
+                <Button
+                  disabled={!data || data.length === 0}
+                  variant="contained"
+                  color="secondary"
+                >
+                  Start
+                </Button>
+              </div>
+            </div>
+          )}
         />
       </div>
     </div>

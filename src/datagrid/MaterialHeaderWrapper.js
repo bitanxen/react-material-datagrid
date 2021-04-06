@@ -10,7 +10,6 @@ function MaterialHeaderWrapper(props) {
     header,
     data,
     settingsProps,
-    filterable,
     resizeHandler,
     freezeColumnHandler,
     freezeColumnWidth,
@@ -24,7 +23,10 @@ function MaterialHeaderWrapper(props) {
     calculatedSelected,
     selectionVariant,
     freezeScroll,
-    regularScroll
+    regularScroll,
+    filterCriteria,
+    createUpdateFilter,
+    removeFilter
   } = props
 
   useEffect(() => {
@@ -50,7 +52,6 @@ function MaterialHeaderWrapper(props) {
           header={header}
           data={data}
           settingsProps={settingsProps}
-          filterable={filterable}
           resizeHandler={resizeHandler}
           freezeColumnHandler={freezeColumnHandler}
           freezeSection={true}
@@ -63,6 +64,9 @@ function MaterialHeaderWrapper(props) {
           allRowSelectionHandler={allRowSelectionHandler}
           dataSelectionHandler={dataSelectionHandler}
           selectionVariant={selectionVariant}
+          filterCriteria={filterCriteria}
+          createUpdateFilter={createUpdateFilter}
+          removeFilter={removeFilter}
         />
       </div>
       <div
@@ -74,7 +78,6 @@ function MaterialHeaderWrapper(props) {
           header={header}
           data={data}
           settingsProps={settingsProps}
-          filterable={filterable}
           resizeHandler={resizeHandler}
           freezeColumnHandler={freezeColumnHandler}
           freezeSection={false}
@@ -87,6 +90,9 @@ function MaterialHeaderWrapper(props) {
           allRowSelectionHandler={allRowSelectionHandler}
           dataSelectionHandler={dataSelectionHandler}
           selectionVariant={selectionVariant}
+          filterCriteria={filterCriteria}
+          createUpdateFilter={createUpdateFilter}
+          removeFilter={removeFilter}
         />
       </div>
     </div>

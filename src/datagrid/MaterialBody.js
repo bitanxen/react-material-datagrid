@@ -21,7 +21,10 @@ const useStyles = makeStyles((theme) => ({
     height: '40px'
   },
   bodyCell: {
-    borderBottom: '0.5px solid #D3D5D9',
+    borderBottom:
+      theme.palette.type === 'dark'
+        ? '0.5px solid #1a1a1e'
+        : '0.5px solid #D3D5D9',
     padding: '0px 10px',
     display: 'flex',
     alignItems: 'center',
@@ -133,24 +136,26 @@ function MaterialBody(props) {
                   : undefined
               }
             >
-              {row[header.colId] ? 'Yes' : 'No'}
+              {row[header.colId]}
             </Button>
           </div>
         )
       }
       case 'other': {
-        ;<div
-          onClick={
-            header.clickHandler && typeof header.clickHandler === 'function'
-              ? () => {
-                  header.clickHandler(row, header)
-                }
-              : undefined
-          }
-          style={{ cursor: header.clickHandler ? 'pointer' : 'auto' }}
-        >
-          {row[header.colId]}
-        </div>
+        return (
+          <div
+            onClick={
+              header.clickHandler && typeof header.clickHandler === 'function'
+                ? () => {
+                    header.clickHandler(row, header)
+                  }
+                : undefined
+            }
+            style={{ cursor: header.clickHandler ? 'pointer' : 'auto' }}
+          >
+            {row[header.colId]}
+          </div>
+        )
       }
     }
   }
@@ -236,7 +241,7 @@ function MaterialBody(props) {
                             <Typography
                               className={classes.cellValue}
                               variant="body2"
-                              color={h.clickHandler ? 'textPrimary' : 'inherit'}
+                              color={h.clickHandler ? 'primary' : 'inherit'}
                             >
                               {row[h.colId]}
                             </Typography>

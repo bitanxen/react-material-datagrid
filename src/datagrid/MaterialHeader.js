@@ -21,7 +21,8 @@ import {
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 import { Resizable } from 'react-resizable'
-import { isSortable } from '../utils/ApplicationUtils'
+import { isSortable, isNonSearchableColumn } from '../utils/ApplicationUtils'
+import HeaderFilter from './HeaderFilter'
 
 const useStyles = makeStyles((theme) => ({
   headerRoot: {
@@ -82,7 +83,8 @@ const useStyles = makeStyles((theme) => ({
   },
   defaultShow: {
     display: 'block',
-    opacity: '0.9'
+    opacity: '0.9',
+    color: theme.palette.secondary.dark
   },
   hoverShow: {
     '&:hover': {
@@ -113,12 +115,15 @@ function MaterialHeader(props) {
   })
   const [checked, setChecked] = useState(false)
   const [indeterminate, setIndeterminate] = useState(false)
+  const [headerFilter, setHeaderFilter] = useState({
+    target: null,
+    header: null
+  })
   const {
     tableSize,
     header,
     data,
     settingsProps,
-    filterable,
     resizeHandler,
     freezeColumnHandler,
     freezeSection,
@@ -130,7 +135,10 @@ function MaterialHeader(props) {
     allRowSelectionHandler,
     dataSelectionHandler,
     calculatedSelected,
-    selectionVariant
+    selectionVariant,
+    filterCriteria,
+    createUpdateFilter,
+    removeFilter
   } = props
 
   const closeHeaderTool = () => {
@@ -142,6 +150,20 @@ function MaterialHeader(props) {
 
   const openHeaderTool = (event, header) => {
     setHeaderTools({
+      target: event.currentTarget,
+      header: header
+    })
+  }
+
+  const closeHeaderFilter = () => {
+    setHeaderFilter({
+      target: null,
+      header: null
+    })
+  }
+
+  const openHeaderFilter = (event, header) => {
+    setHeaderFilter({
       target: event.currentTarget,
       header: header
     })
@@ -160,6 +182,15 @@ function MaterialHeader(props) {
         calculatedSelected.length !== data.length
     )
   }, [calculatedSelected, data])
+
+  const showFilter = (colId) => {
+    return (
+      (filterCriteria.filters &&
+        filterCriteria.filters[colId] &&
+        filterCriteria.filters[colId].length > 0) ||
+      (headerFilter.header && headerFilter.header.colId === colId)
+    )
+  }
 
   return (
     <div
@@ -282,18 +313,22 @@ function MaterialHeader(props) {
                     <Lock fontSize="inherit" />
                   </IconButton>
                 )}
-                {filterable && (
-                  <IconButton
-                    aria-label="Column Filtered"
-                    size="small"
-                    className={clsx(
-                      classes.defaultHide,
-                      classes.menuIconDisplay
-                    )}
-                  >
-                    <FilterList fontSize="inherit" />
-                  </IconButton>
-                )}
+                {settingsProps.filterable &&
+                  !isNonSearchableColumn(header, h.colId) && (
+                    <IconButton
+                      aria-label="Column Filtered"
+                      size="small"
+                      className={clsx(
+                        !showFilter(h.colId)
+                          ? classes.defaultHide
+                          : classes.defaultShow,
+                        classes.menuIconDisplay
+                      )}
+                      onClick={(e) => openHeaderFilter(e, h)}
+                    >
+                      <FilterList fontSize="inherit" />
+                    </IconButton>
+                  )}
                 <IconButton
                   aria-label="Column Settings"
                   size="small"
@@ -397,6 +432,13 @@ function MaterialHeader(props) {
           <ListItemText disableTypography primary="Hide" />
         </MenuItem>
       </Popover>
+      <HeaderFilter
+        closeHandler={closeHeaderFilter}
+        headerFilter={headerFilter}
+        filterCriteria={filterCriteria}
+        createUpdateFilter={createUpdateFilter}
+        removeFilter={removeFilter}
+      />
     </div>
   )
 }

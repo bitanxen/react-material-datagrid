@@ -11,7 +11,11 @@ import _ from 'lodash'
 
 import useWidth from '../hooks/useWidth'
 import usePrevious from '../hooks/usePrevious'
-import { breakpointQuery, newMuiTheme } from '../utils/ApplicationUtils'
+import {
+  breakpointQuery,
+  newMuiTheme,
+  filterData
+} from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
 import MaterialFooter from './MaterialFooter'
 
@@ -47,6 +51,7 @@ function MaterialDataGrid(props) {
   const classes = useStyles()
   const width = useWidth(containerRef)
   const previousWidth = usePrevious(width)
+  const [internalMessage, setInternalMessage] = useState(null)
   const [calculatedSize, setCaluclatedSize] = useState('medium')
   const [calculatedHeader, setCalculatedHeader] = useState([])
   const [calculatedData, setCalculatedData] = useState([])
@@ -60,6 +65,10 @@ function MaterialDataGrid(props) {
   const [freezeScroll, setFreezeScroll] = useState(0)
   const [regularScroll, setRegularScroll] = useState(0)
   const [showSelectedData, setShowSelectedData] = useState(false)
+  const [filterCriteria, setFilterCriteria] = useState({
+    searchTerm: null,
+    filters: null
+  })
 
   const {
     theme,
@@ -69,9 +78,6 @@ function MaterialDataGrid(props) {
     fitColumns,
     data,
     tableSize,
-    searchable,
-    filterable,
-    downloadable,
     settingsProps,
     tableTools,
     toolIconColor,
@@ -81,7 +87,8 @@ function MaterialDataGrid(props) {
     pagination,
     rowsPerPageOptions,
     defaultRowsPerPage,
-    strictBodyHeight
+    strictBodyHeight,
+    tableBottomActions
   } = props
 
   useEffect(() => {
@@ -186,6 +193,9 @@ function MaterialDataGrid(props) {
   }, [refitColumns])
 
   const prepareData = useMemo(() => {
+    if (!data) {
+      return false
+    }
     const preparedData = data.map((d) => {
       const row = {}
       calculatedHeader.forEach((h) => {
@@ -200,18 +210,42 @@ function MaterialDataGrid(props) {
   }, [data, calculatedHeader])
 
   useEffect(() => {
-    setCalculatedData(prepareData)
-  }, [prepareData])
-
-  useEffect(() => {
-    if (showSelectedData) {
-      setViewableData(calculatedSelected)
-      setCalculatedPage(1)
+    if (!prepareData) {
+      setInternalMessage('Loading Data...')
       return
     }
 
-    setViewableData(calculatedData)
-  }, [calculatedData, showSelectedData, calculatedSelected])
+    if (prepareData.length === 0) {
+      setInternalMessage('No Data Available')
+      setCalculatedData([])
+    } else {
+      setInternalMessage(null)
+      setCalculatedData(prepareData)
+    }
+  }, [prepareData])
+
+  useEffect(() => {
+    const preFilterredData = showSelectedData
+      ? calculatedSelected
+      : calculatedData
+
+    const postFilterredData = filterData(
+      preFilterredData,
+      filterCriteria,
+      calculatedHeader
+    )
+
+    setViewableData(postFilterredData)
+    if (showSelectedData) {
+      setCalculatedPage(1)
+    }
+  }, [
+    calculatedData,
+    showSelectedData,
+    calculatedSelected,
+    filterCriteria,
+    calculatedHeader
+  ])
 
   useEffect(() => {
     if (
@@ -428,6 +462,53 @@ function MaterialDataGrid(props) {
     setRowPerPage(e.target.value)
   }
 
+  const createUpdateFilter = (colId, filter) => {
+    const columnFilter = filterCriteria.filters
+      ? filterCriteria.filters[colId]
+      : []
+    let updatedFilters = []
+    if (columnFilter) {
+      const alreadyAddedFilter = columnFilter.filter(
+        (f) => f.filterId === filter.filterId
+      )
+      if (alreadyAddedFilter.length > 0) {
+        updatedFilters = columnFilter.map((f) => {
+          if (f.filterId === filter.filterId) {
+            return filter
+          } else {
+            return f
+          }
+        })
+      } else {
+        updatedFilters = [...columnFilter, filter]
+      }
+    } else {
+      updatedFilters = [filter]
+    }
+    setCalculatedPage(1)
+    setFilterCriteria({
+      ...filterCriteria,
+      filters: {
+        ...filterCriteria.filters,
+        [colId]: updatedFilters
+      }
+    })
+  }
+
+  const removeFilter = (colId, filter) => {
+    const columnFilter = filterCriteria.filters[colId]
+    const updatedFilters = columnFilter.filter(
+      (f) => f.filterId !== filter.filterId
+    )
+    setFilterCriteria({
+      ...filterCriteria,
+      filters: {
+        ...filterCriteria.filters,
+        [colId]: updatedFilters
+      }
+    })
+  }
+
   return (
     <StylesProvider generateClassName={createGenerateClassName()}>
       <ThemeProvider theme={theme || newMuiTheme()}>
@@ -437,9 +518,6 @@ function MaterialDataGrid(props) {
               tableName={tableName}
               tableSize={calculatedSize}
               tableWidth={width || 1000}
-              searchable={searchable}
-              filterable={filterable}
-              downloadable={downloadable}
               settingsProps={settingsProps}
               tableTools={tableTools}
               toolIconColor={toolIconColor}
@@ -453,6 +531,11 @@ function MaterialDataGrid(props) {
               calculatedSelected={calculatedSelected}
               showSelectedData={showSelectedData}
               showSelectedDataHandler={setShowSelectedData}
+              updateSearchTerm={(searchTerm) => {
+                setCalculatedPage(1)
+                setFilterCriteria({ ...filterCriteria, searchTerm: searchTerm })
+              }}
+              filterCriteria={filterCriteria}
             />
             <div
               className={classes.tableWrapper}
@@ -467,7 +550,6 @@ function MaterialDataGrid(props) {
                 header={calculatedHeader}
                 data={viewableData}
                 settingsProps={settingsProps}
-                filterable={filterable}
                 resizeHandler={resizeHandler}
                 freezeColumnHandler={freezeColumnHandler}
                 freezeColumnWidth={getFreezeColWidth()}
@@ -482,6 +564,9 @@ function MaterialDataGrid(props) {
                 selectionVariant={selectionVariant}
                 freezeScroll={freezeScroll}
                 regularScroll={regularScroll}
+                filterCriteria={filterCriteria}
+                createUpdateFilter={createUpdateFilter}
+                removeFilter={removeFilter}
               />
               <MaterialBodyWrapper
                 tableSize={calculatedSize}
@@ -502,8 +587,14 @@ function MaterialDataGrid(props) {
                 regularScrollHandler={setRegularScroll}
                 strictBodyHeight={strictBodyHeight}
                 defaultRowsPerPage={defaultRowsPerPage}
+                internalMessage={internalMessage}
               />
             </div>
+            {tableBottomActions && (
+              <div style={{ width: '100%', overflowX: 'auto' }}>
+                {tableBottomActions(calculatedSelected)}
+              </div>
+            )}
             <MaterialFooter
               page={calculatedPage}
               rowPerPage={rowPerPage}
@@ -527,10 +618,10 @@ function MaterialDataGrid(props) {
 
 MaterialDataGrid.defaultProps = {
   fitColumns: false,
-  searchable: true,
-  filterable: true,
-  downloadable: true,
   settingsProps: {
+    searchable: true,
+    filterable: true,
+    downloadable: true,
     resizeColumn: true,
     freezeColumm: true,
     columnRepositioning: true,
@@ -588,10 +679,10 @@ MaterialDataGrid.propTypes = {
   ).isRequired,
   fitColumns: PropTypes.bool,
   data: PropTypes.array,
-  searchable: PropTypes.bool,
-  filterable: PropTypes.bool,
-  downloadable: PropTypes.bool,
   settingsProps: PropTypes.shape({
+    searchable: PropTypes.bool,
+    filterable: PropTypes.bool,
+    downloadable: PropTypes.bool,
     resizeColumn: PropTypes.bool,
     freezeColumm: PropTypes.bool,
     columnRepositioning: PropTypes.bool,
@@ -611,6 +702,7 @@ MaterialDataGrid.propTypes = {
     'primary',
     'secondary'
   ]),
+  tableBottomActions: PropTypes.func,
   dataSelected: PropTypes.array,
   selectionVariant: PropTypes.oneOf(['single', 'multi']),
   dataSelectionHandler: PropTypes.func,

@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import {
   makeStyles,
+  withStyles,
+  Badge,
   Typography,
   IconButton,
   Popover,
   MenuItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
+  ClickAwayListener,
+  InputBase
 } from '@material-ui/core'
-import { MoreVert } from '@material-ui/icons'
+import { MoreVert, CloseSharp } from '@material-ui/icons'
 import clsx from 'clsx'
 import _ from 'lodash'
 
@@ -35,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '1.3rem'
   },
   tableInfo: {
-    width: '60%'
+    width: '60%',
+    display: 'flex'
   },
   tableInfoText: {
     whiteSpace: 'nowrap',
@@ -66,16 +71,15 @@ const useStyles = makeStyles((theme) => ({
 
 function MaterialToolbar(props) {
   const classes = useStyles()
+  const textInput = useRef(null)
   const [tools, setTools] = useState([])
   const [toolMenu, setToolMenu] = useState(null)
   const [columnSetting, setColumnSetting] = useState(null)
+  const [searchEnable, setSearchEnable] = useState(false)
   const {
     tableSize,
     tableName,
     tableWidth,
-    searchable,
-    filterable,
-    downloadable,
     settingsProps,
     tableTools,
     toolIconColor,
@@ -84,14 +88,17 @@ function MaterialToolbar(props) {
     columnReorderHandler,
     calculatedSelected,
     showSelectedData,
-    showSelectedDataHandler
+    showSelectedDataHandler,
+    updateSearchTerm
   } = props
 
   const openHiddenTools = (event) => {
     setToolMenu(event.currentTarget)
   }
 
-  const startSearch = () => {}
+  const startSearch = () => {
+    setSearchEnable(true)
+  }
 
   const startFilter = () => {}
 
@@ -106,12 +113,24 @@ function MaterialToolbar(props) {
   }
 
   useEffect(() => {
+    if (searchEnable && textInput.current) {
+      textInput.current.focus()
+    }
+  }, [searchEnable, textInput])
+
+  const handleClickAway = () => {
+    if (textInput.current.value.length === 0) {
+      setSearchEnable(false)
+    }
+  }
+
+  useEffect(() => {
     const defaultTools = getDefaultTools(
-      searchable,
+      settingsProps.searchable,
       startSearch,
-      filterable,
+      settingsProps.filterable,
       startFilter,
-      downloadable,
+      settingsProps.downloadable,
       startDownload,
       settingsProps.resetColumn,
       startReset
@@ -145,13 +164,21 @@ function MaterialToolbar(props) {
     })
     setTools([...toolsVisiable, ...toolsHidden])
   }, [
-    searchable,
-    filterable,
-    downloadable,
+    settingsProps.searchable,
+    settingsProps.filterable,
+    settingsProps.downloadable,
     settingsProps.resetColumn,
     tableWidth,
     tableTools
   ])
+
+  const StyledBadge = withStyles((theme) => ({
+    badge: {
+      right: -12,
+      top: 8,
+      padding: '0 4px'
+    }
+  }))(Badge)
 
   return (
     <div
@@ -165,21 +192,60 @@ function MaterialToolbar(props) {
       )}
     >
       <div className={classes.tableInfo}>
-        <Typography className={classes.tableInfoText} variant="h5">
-          {tableName}{' '}
-          {calculatedSelected && calculatedSelected.length > 0 && (
-            <>
-              {' : '}
-              <span
-                onClick={() => showSelectedDataHandler(!showSelectedData)}
-                style={{ cursor: 'pointer' }}
-                className={showSelectedData ? classes.showSelectedData : ''}
-              >
-                {calculatedSelected.length} selected
-              </span>
-            </>
-          )}
-        </Typography>
+        <div
+          style={{
+            height: '100%',
+            marginTop: 'auto',
+            marginBottom: 'auto',
+            marginLeft: '10px'
+          }}
+        >
+          <StyledBadge
+            style={{ cursor: 'pointer' }}
+            badgeContent={calculatedSelected ? calculatedSelected.length : 0}
+            color={showSelectedData ? 'secondary' : 'error'}
+            onClick={() => {
+              if (calculatedSelected && calculatedSelected.length > 0) {
+                showSelectedDataHandler(!showSelectedData)
+              }
+            }}
+          >
+            <Typography className={classes.tableInfoText} variant="h6">
+              {tableName}
+            </Typography>
+          </StyledBadge>
+        </div>
+        {searchEnable && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginLeft: '30px'
+            }}
+          >
+            <IconButton
+              onClick={() => {
+                updateSearchTerm(null)
+                setSearchEnable(false)
+              }}
+            >
+              <CloseSharp style={{ color: 'red' }} />
+            </IconButton>
+            <div style={{ paddingLeft: '5px' }}>
+              <ClickAwayListener onClickAway={handleClickAway}>
+                <InputBase
+                  className={classes.textField}
+                  placeholder={`Search ${tableName}`}
+                  inputProps={{ 'aria-label': 'search table' }}
+                  onChange={(e) => {
+                    setTimeout(updateSearchTerm(e.target.value), 500)
+                  }}
+                  inputRef={textInput}
+                />
+              </ClickAwayListener>
+            </div>
+          </div>
+        )}
       </div>
       <div className={classes.tableToolInfo}>
         {tools
@@ -193,7 +259,7 @@ function MaterialToolbar(props) {
               className={classes.visibleMenuIcons}
               onClick={(e) => tool.clickHandler(e, calculatedSelected)}
             >
-              <tool.icon fontSize="inherit" />
+              <tool.icon style={{ fontSize: '1.6rem' }} />
             </IconButton>
           ))}
 
@@ -206,7 +272,7 @@ function MaterialToolbar(props) {
               onClick={openHiddenTools}
               className={classes.visibleMenuIcons}
             >
-              <MoreVert fontSize="inherit" />
+              <MoreVert style={{ fontSize: '1.6rem' }} />
             </IconButton>
             <Popover
               open={Boolean(toolMenu)}
@@ -223,6 +289,7 @@ function MaterialToolbar(props) {
             >
               {tools
                 .filter((t) => !t.show)
+                .filter((t) => t.display)
                 .map((tool, index) => (
                   <React.Fragment key={index}>
                     <MenuItem
@@ -236,7 +303,7 @@ function MaterialToolbar(props) {
                         color={toolIconColor}
                         className={classes.menuIcon}
                       >
-                        <tool.icon fontSize="small" />
+                        <tool.icon style={{ fontSize: '1.6rem' }} />
                       </ListItemIcon>
                       <ListItemText disableTypography primary={tool.name} />
                     </MenuItem>
@@ -272,10 +339,10 @@ MaterialToolbar.propTypes = {
   tableName: PropTypes.string.isRequired,
   tableSize: PropTypes.string.isRequired,
   tableWidth: PropTypes.number.isRequired,
-  searchable: PropTypes.bool.isRequired,
-  filterable: PropTypes.bool.isRequired,
-  downloadable: PropTypes.bool.isRequired,
   settingsProp: PropTypes.shape({
+    searchable: PropTypes.bool.isRequired,
+    filterable: PropTypes.bool.isRequired,
+    downloadable: PropTypes.bool.isRequired,
     resetColumn: PropTypes.bool,
     resizeColumn: PropTypes.bool,
     freezeColumm: PropTypes.bool,
