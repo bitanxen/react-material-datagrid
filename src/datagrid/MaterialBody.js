@@ -23,8 +23,8 @@ const useStyles = makeStyles((theme) => ({
   bodyCell: {
     borderBottom:
       theme.palette.type === 'dark'
-        ? '0.5px solid #1a1a1e'
-        : '0.5px solid #D3D5D9',
+        ? '0.5px solid rgb(185, 191, 203, 5%)'
+        : '0.5px solid rgb(185, 191, 203, 30%)',
     padding: '0px 10px',
     display: 'flex',
     alignItems: 'center',
@@ -44,6 +44,21 @@ const useStyles = makeStyles((theme) => ({
   },
   cellButton: {
     lineHeight: 'normal'
+  },
+  bodyRowEven: {
+    backgroundColor: 'rgb(0, 0, 0, 5%)'
+  },
+  bodyRowOdd: {
+    backgroundColor: 'rgb(0, 0, 0, 0%)'
+  },
+  cellValueHyperlink: {
+    color: theme.palette.type === 'light' ? theme.palette.primary[500] : theme.palette.primary[200],
+    fontWeight: 600,
+    fontSize: '0.8rem'
+  },
+  cellValueNormal: {
+    color: 'inherit',
+    fontSize: '0.75rem'
   }
 }))
 
@@ -61,7 +76,8 @@ function MaterialBody(props) {
     singleRowSelectionHandler,
     dataSelectionHandler,
     page,
-    rowsPerPage
+    rowsPerPage,
+    tableSripe
   } = props
 
   const isSelected = (row) => {
@@ -170,7 +186,7 @@ function MaterialBody(props) {
               {((freezeSection && freezeColumnWidth > 0) ||
                 (!freezeSection && freezeColumnWidth === 0)) &&
                 (dataSelectionHandler || calculatedSelected) && (
-                  <div className={classes.bodyCell}>
+                  <div className={clsx(classes.bodyCell, tableSripe && index % 2 === 0 ? classes.bodyRowEven : classes.bodyRowOdd)}>
                     <Checkbox
                       style={{ padding: 0 }}
                       checked={isSelected(row)}
@@ -185,7 +201,7 @@ function MaterialBody(props) {
                 .filter((h) => h.freeze === freezeSection)
                 .map((h) => (
                   <div
-                    className={classes.bodyCell}
+                    className={clsx(classes.bodyCell, tableSripe && index % 2 === 0 ? classes.bodyRowEven : classes.bodyRowOdd)}
                     style={{
                       minWidth: h.targetWidth,
                       width: h.targetWidth,
@@ -193,7 +209,7 @@ function MaterialBody(props) {
                         ? typeof h.backgroundColor === 'function'
                           ? h.backgroundColor(row)
                           : h.backgroundColor
-                        : 'transparent',
+                        : 'auto',
                       color: h.backgroundColor
                         ? theme.palette.getContrastText(
                             typeof h.backgroundColor === 'function'
@@ -239,9 +255,7 @@ function MaterialBody(props) {
                             }}
                           >
                             <Typography
-                              className={classes.cellValue}
-                              variant="body2"
-                              color={h.clickHandler ? 'primary' : 'inherit'}
+                              className={clsx(classes.cellValue, h.clickHandler ? classes.cellValueHyperlink : classes.cellValueNormal)}
                             >
                               {row[h.colId]}
                             </Typography>

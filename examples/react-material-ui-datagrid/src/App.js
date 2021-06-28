@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { MaterialDataGrid } from 'react-material-datagrid'
 import { Add, Delete } from '@material-ui/icons'
 import './style.css'
-import { Button } from '@material-ui/core'
+import { Button, Paper, ThemeProvider } from '@material-ui/core'
+
+import { createMuiTheme } from '@material-ui/core/styles';
+import indigo from '@material-ui/core/colors/indigo';
+import green from '@material-ui/core/colors/green';
 
 function App() {
   const [data, setData] = useState([])
+  const [themeType, setThemeType] = useState("light");
 
   /*
  useEffect(() => {
@@ -72,6 +77,14 @@ function App() {
     console.log(selectedData)
   }
 
+  const switchTheme = () => {
+    if(themeType === "light") {
+      setThemeType("dark");
+    } else {
+      setThemeType("light");
+    }
+  }
+
   /*
 <div style={{ width: toggle ? '30%' : '10%' }}>
         <button
@@ -86,11 +99,23 @@ function App() {
       toggle ? '70%' : '90%'
   */
 
+      const theme = createMuiTheme({
+        palette: {
+          type: themeType,
+          primary: indigo,
+          secondary: {
+            main: green[500],
+          },
+        },
+      });
+
   return (
+    <ThemeProvider theme={theme}>
     <div className="App" style={{ display: 'flex' }}>
       <div style={{ width: '100%' }}>
         <MaterialDataGrid
           tableName="Material UI Table"
+          tableSripe
           header={[
             {
               colId: 'userId',
@@ -109,7 +134,6 @@ function App() {
               width: 250,
               maxWidth: 350,
               resize: true,
-              backgroundColor: '#f0f0f0',
               clickHandler: (data, header) => {
                 console.log(data)
               },
@@ -264,6 +288,10 @@ function App() {
         />
       </div>
     </div>
+    <Paper style={{marginTop: "10px", display: "flex", justifyContent: "center", padding: "10px 0"}}>
+      <Button onClick={() => switchTheme()}>Switch Theme</Button>
+    </Paper>
+    </ThemeProvider>
   )
 }
 

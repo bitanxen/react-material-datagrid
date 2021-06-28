@@ -6,20 +6,20 @@ import MaterialBody from './MaterialBody'
 const useStyles = makeStyles((theme) => ({
   '@global': {
     'div.material-data-grid-body::-webkit-scrollbar': {
-      width: '8px',
-      height: '8px'
+      width: '10px',
+      height: '10px',
+      overflow: 'overlay'
     },
     'div.material-data-grid-body::-webkit-scrollbar-track': {
-      '-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0,0.3)',
-      backgroundColor: theme.palette.primary[100]
+      // '-webkit-box-shadow': 'inset 0 0 6px rgba(0,0,0, 0.1)',
+      backgroundColor: 'rgba(255, 255, 255, 5%)'
     },
     'div.material-data-grid-body::-webkit-scrollbar-thumb': {
-      backgroundColor: theme.palette.primary[300],
-      border: '2px solid #555555'
+      backgroundColor: theme.palette.type === 'light' ? theme.palette.primary[50] : 'rgba(124, 124, 124, 50%)'
+      // border: '2px solid #555555'
     },
     'div.material-data-grid-body::-webkit-scrollbar-thumb:hover': {
-      backgroundColor: theme.palette.primary[500],
-      border: '2px solid #555555'
+      backgroundColor: theme.palette.primary[300]
     }
   },
   root: {
@@ -35,6 +35,7 @@ function MaterialBodyWrapper(props) {
 
   const {
     tableSize,
+    tableSripe,
     freezeColumnWidth,
     regularColumnWidth,
     header,
@@ -107,6 +108,7 @@ function MaterialBodyWrapper(props) {
               dataSelectionHandler={dataSelectionHandler}
               rowsPerPage={rowsPerPage}
               page={page}
+              tableSripe={tableSripe}
             />
           </div>
           <div
@@ -135,6 +137,7 @@ function MaterialBodyWrapper(props) {
               dataSelectionHandler={dataSelectionHandler}
               rowsPerPage={rowsPerPage}
               page={page}
+              tableSripe={tableSripe}
             />
           </div>
         </>

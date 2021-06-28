@@ -1,21 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
-import {
-  makeStyles,
-  createGenerateClassName,
-  StylesProvider,
-  Paper,
-  ThemeProvider
-} from '@material-ui/core'
+import { makeStyles, Paper, ThemeProvider } from '@material-ui/core'
 import _ from 'lodash'
 
 import useWidth from '../hooks/useWidth'
 import usePrevious from '../hooks/usePrevious'
-import {
-  breakpointQuery,
-  newMuiTheme,
-  filterData
-} from '../utils/ApplicationUtils'
+import { breakpointQuery, filterData } from '../utils/ApplicationUtils'
 import MaterialToolbar from './MaterialToolbar'
 import MaterialFooter from './MaterialFooter'
 
@@ -74,6 +64,7 @@ function MaterialDataGrid(props) {
     theme,
     className,
     tableName,
+    tableSripe,
     header,
     fitColumns,
     data,
@@ -510,114 +501,114 @@ function MaterialDataGrid(props) {
   }
 
   return (
-    <StylesProvider generateClassName={createGenerateClassName()}>
-      <ThemeProvider theme={theme || newMuiTheme()}>
-        <div ref={containerRef} className={className}>
-          <Paper className={classes.paper}>
-            <MaterialToolbar
-              tableName={tableName}
+    <ThemeProvider theme={theme}>
+      <div ref={containerRef} className={className}>
+        <Paper className={classes.paper}>
+          <MaterialToolbar
+            tableName={tableName}
+            tableSize={calculatedSize}
+            tableWidth={width || 1000}
+            settingsProps={settingsProps}
+            tableTools={tableTools}
+            toolIconColor={toolIconColor}
+            searchHandler={() => {}}
+            filterhandler={() => {}}
+            downloadHandler={() => {}}
+            sorting={calculatedSorting}
+            header={calculatedHeader}
+            toggleShowHideColumn={toggleShowHideColumn}
+            columnReorderHandler={columnReorder}
+            calculatedSelected={calculatedSelected}
+            showSelectedData={showSelectedData}
+            showSelectedDataHandler={setShowSelectedData}
+            updateSearchTerm={(searchTerm) => {
+              setCalculatedPage(1)
+              setFilterCriteria({ ...filterCriteria, searchTerm: searchTerm })
+            }}
+            filterCriteria={filterCriteria}
+          />
+          <div
+            className={classes.tableWrapper}
+            style={{
+              width: `${width}px`,
+              maxWidth: '100%',
+              transition: 'width 0.5s ease-in-out'
+            }}
+          >
+            <MaterialHeaderWrapper
               tableSize={calculatedSize}
-              tableWidth={width || 1000}
-              settingsProps={settingsProps}
-              tableTools={tableTools}
-              toolIconColor={toolIconColor}
-              searchHandler={() => {}}
-              filterhandler={() => {}}
-              downloadHandler={() => {}}
-              sorting={calculatedSorting}
               header={calculatedHeader}
-              toggleShowHideColumn={toggleShowHideColumn}
-              columnReorderHandler={columnReorder}
-              calculatedSelected={calculatedSelected}
-              showSelectedData={showSelectedData}
-              showSelectedDataHandler={setShowSelectedData}
-              updateSearchTerm={(searchTerm) => {
-                setCalculatedPage(1)
-                setFilterCriteria({ ...filterCriteria, searchTerm: searchTerm })
-              }}
-              filterCriteria={filterCriteria}
-            />
-            <div
-              className={classes.tableWrapper}
-              style={{
-                width: `${width}px`,
-                maxWidth: '100%',
-                transition: 'width 0.5s ease-in-out'
-              }}
-            >
-              <MaterialHeaderWrapper
-                tableSize={calculatedSize}
-                header={calculatedHeader}
-                data={viewableData}
-                settingsProps={settingsProps}
-                resizeHandler={resizeHandler}
-                freezeColumnHandler={freezeColumnHandler}
-                freezeColumnWidth={getFreezeColWidth()}
-                regularColumnWidth={getRegularColWidth()}
-                toggleShowHideColumn={toggleShowHideColumn}
-                sorting={calculatedSorting}
-                sortColumn={sortColumn}
-                unsortColumn={unsortColumn}
-                calculatedSelected={calculatedSelected}
-                allRowSelectionHandler={allRowSelectionHandler}
-                dataSelectionHandler={dataSelectionHandler}
-                selectionVariant={selectionVariant}
-                freezeScroll={freezeScroll}
-                regularScroll={regularScroll}
-                filterCriteria={filterCriteria}
-                createUpdateFilter={createUpdateFilter}
-                removeFilter={removeFilter}
-              />
-              <MaterialBodyWrapper
-                tableSize={calculatedSize}
-                freezeSection={false}
-                freezeColumnWidth={getFreezeColWidth()}
-                regularColumnWidth={getRegularColWidth()}
-                header={calculatedHeader}
-                data={viewableData}
-                sorting={calculatedSorting}
-                calculatedSelected={calculatedSelected}
-                calculatedKeyCol={calculatedKeyCol}
-                singleRowSelectionHandler={singleRowSelectionHandler}
-                dataSelectionHandler={dataSelectionHandler}
-                selectionVariant={selectionVariant}
-                rowsPerPage={rowPerPage}
-                page={calculatedPage}
-                freezeScrollHandler={setFreezeScroll}
-                regularScrollHandler={setRegularScroll}
-                strictBodyHeight={strictBodyHeight}
-                defaultRowsPerPage={defaultRowsPerPage}
-                internalMessage={internalMessage}
-              />
-            </div>
-            {tableBottomActions && (
-              <div style={{ width: '100%', overflowX: 'auto' }}>
-                {tableBottomActions(calculatedSelected)}
-              </div>
-            )}
-            <MaterialFooter
-              page={calculatedPage}
-              rowPerPage={rowPerPage}
               data={viewableData}
-              totalRecord={calculatedData.length}
-              boundaryCount={1}
-              siblingCount={width > 800 ? 1 : 0}
-              changePage={changePage}
-              width={width}
-              pagination={pagination}
-              changeRowPerPage={changeRowPerPage}
-              rowsOptions={rowsOptions}
-              showSelectedData={showSelectedData}
+              settingsProps={settingsProps}
+              resizeHandler={resizeHandler}
+              freezeColumnHandler={freezeColumnHandler}
+              freezeColumnWidth={getFreezeColWidth()}
+              regularColumnWidth={getRegularColWidth()}
+              toggleShowHideColumn={toggleShowHideColumn}
+              sorting={calculatedSorting}
+              sortColumn={sortColumn}
+              unsortColumn={unsortColumn}
+              calculatedSelected={calculatedSelected}
+              allRowSelectionHandler={allRowSelectionHandler}
+              dataSelectionHandler={dataSelectionHandler}
+              selectionVariant={selectionVariant}
+              freezeScroll={freezeScroll}
+              regularScroll={regularScroll}
+              filterCriteria={filterCriteria}
+              createUpdateFilter={createUpdateFilter}
+              removeFilter={removeFilter}
             />
-          </Paper>
-        </div>
-      </ThemeProvider>
-    </StylesProvider>
+            <MaterialBodyWrapper
+              tableSize={calculatedSize}
+              freezeSection={false}
+              freezeColumnWidth={getFreezeColWidth()}
+              regularColumnWidth={getRegularColWidth()}
+              header={calculatedHeader}
+              data={viewableData}
+              sorting={calculatedSorting}
+              calculatedSelected={calculatedSelected}
+              calculatedKeyCol={calculatedKeyCol}
+              singleRowSelectionHandler={singleRowSelectionHandler}
+              dataSelectionHandler={dataSelectionHandler}
+              selectionVariant={selectionVariant}
+              rowsPerPage={rowPerPage}
+              page={calculatedPage}
+              freezeScrollHandler={setFreezeScroll}
+              regularScrollHandler={setRegularScroll}
+              strictBodyHeight={strictBodyHeight}
+              defaultRowsPerPage={defaultRowsPerPage}
+              internalMessage={internalMessage}
+              tableSripe={tableSripe}
+            />
+          </div>
+          {tableBottomActions && (
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+              {tableBottomActions(calculatedSelected)}
+            </div>
+          )}
+          <MaterialFooter
+            page={calculatedPage}
+            rowPerPage={rowPerPage}
+            data={viewableData}
+            totalRecord={calculatedData.length}
+            boundaryCount={1}
+            siblingCount={width > 800 ? 1 : 0}
+            changePage={changePage}
+            width={width}
+            pagination={pagination}
+            changeRowPerPage={changeRowPerPage}
+            rowsOptions={rowsOptions}
+            showSelectedData={showSelectedData}
+          />
+        </Paper>
+      </div>
+    </ThemeProvider>
   )
 }
 
 MaterialDataGrid.defaultProps = {
   fitColumns: false,
+  tableSripe: false,
   settingsProps: {
     searchable: true,
     filterable: true,
@@ -641,6 +632,7 @@ MaterialDataGrid.propTypes = {
   className: PropTypes.object,
   tableName: PropTypes.string.isRequired,
   tableSize: PropTypes.oneOf(['small', 'medium', 'large', undefined]),
+  tableSripe: PropTypes.bool,
   header: PropTypes.arrayOf(
     PropTypes.shape({
       isIdCol: PropTypes.bool,

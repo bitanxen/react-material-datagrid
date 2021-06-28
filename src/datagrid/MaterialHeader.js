@@ -49,13 +49,14 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     justifyContent: 'space-between',
     height: '100%',
-    borderBottom: '0.5px solid #878C97'
+    borderBottom: '0.2px solid rgb(24, 29, 37, 20%)'
   },
   headerCellInfo: {
     margin: 'auto 0'
   },
   headerText: {
     fontWeight: 600,
+    fontSize: '0.85rem',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
@@ -72,8 +73,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'flex-end'
   },
   verticalLine: {
-    borderRight: '2px solid #8FA3A2',
-    height: '80%',
+    borderRight: `2px solid ${theme.palette.text.hint}`,
+    height: '40%',
     margin: 'auto 0',
     cursor: 'w-resize',
     width: 5
@@ -261,7 +262,7 @@ function MaterialHeader(props) {
                   className={classes.headerCellInfo}
                   style={{ width: h.targetWidth }}
                 >
-                  <Typography className={classes.headerText} variant="body2">
+                  <Typography className={classes.headerText}>
                     {h.colName}
                   </Typography>
                 </div>

@@ -43,8 +43,7 @@ function MaterialHeaderWrapper(props) {
         ref={freezeRef}
         style={{
           overflow: 'hidden',
-          width: freezeColumnWidth,
-          boxShadow: '3px 0px 1px #DDD'
+          width: freezeColumnWidth
         }}
       >
         <MaterialHeader
