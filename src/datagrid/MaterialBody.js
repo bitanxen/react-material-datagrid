@@ -54,11 +54,11 @@ const useStyles = makeStyles((theme) => ({
   cellValueHyperlink: {
     color: theme.palette.type === 'light' ? theme.palette.primary[500] : theme.palette.primary[200],
     fontWeight: 600,
-    fontSize: '0.8rem'
+    fontSize: '0.9rem'
   },
   cellValueNormal: {
     color: 'inherit',
-    fontSize: '0.75rem'
+    fontSize: '0.85rem'
   }
 }))
 
