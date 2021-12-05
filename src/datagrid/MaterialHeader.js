@@ -83,16 +83,28 @@ const useStyles = makeStyles((theme) => ({
     opacity: '0'
   },
   defaultShow: {
-    display: 'block',
     opacity: '0.9',
     color: theme.palette.secondary.dark
   },
   hoverShow: {
     '&:hover': {
       '& $defaultHide': {
-        display: 'block',
         opacity: '1'
       }
+    }
+  },
+  headerToolsBackground: {
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: '5px',
+    '&:hover': {
+      backgroundColor:
+        theme.palette.type === 'dark'
+          ? 'rgba(41, 41, 41, 0.7)'
+          : 'rgba(235, 235, 235, 0.8)',
+      color: theme.palette.text.primary,
+      opacity: '1'
     }
   },
   menuItem: {
@@ -193,6 +205,13 @@ function MaterialHeader(props) {
     )
   }
 
+  const isResizeEnabled = (h) => {
+    return (
+      (settingsProps.resizeColumn && h.resize !== false) ||
+      (!settingsProps.resizeColumn && h.resize)
+    )
+  }
+
   return (
     <div
       className={clsx(
@@ -234,12 +253,9 @@ function MaterialHeader(props) {
             }}
             height={40}
             maxConstraints={h.maxWidth ? [h.maxWidth, 40] : undefined}
-            resizeHandles={['e']}
+            resizeHandles={isResizeEnabled(h) ? ['e'] : []}
             handle={
-              ((settingsProps.resizeColumn && h.resize !== false) ||
-                (!settingsProps.resizeColumn && h.resize)) && (
-                <span className={classes.verticalLine} />
-              )
+              isResizeEnabled(h) && <span className={classes.verticalLine} />
             }
             handleSize={[15, 15]}
             onResize={(e, resize) => resizeHandler(h, e, resize)}
@@ -276,68 +292,70 @@ function MaterialHeader(props) {
                   height: '100%'
                 }}
               >
-                {sorting && (
-                  <IconButton
-                    aria-label="Column Freezed"
-                    size="small"
-                    className={clsx(
-                      classes.menuIconDisplay,
-                      sorting.property === h.colId
-                        ? classes.defaultShow
-                        : classes.defaultHide
-                    )}
-                    disabled={!settingsProps.ordering}
-                    onClick={() => {
-                      if (isSortable(h)) {
-                        sortColumn(h)
-                      }
-                    }}
-                  >
-                    {sorting.order === 'desc' ? (
-                      <ArrowUpwardSharp fontSize="small" />
-                    ) : (
-                      <ArrowDownwardSharp fontSize="small" />
-                    )}
-                  </IconButton>
-                )}
-                {((settingsProps.freezeColumm && h.freezable !== false) ||
-                  (!settingsProps.freezeColumm && h.freezable)) && (
-                  <IconButton
-                    aria-label="Column Freezed"
-                    size="small"
-                    className={clsx(
-                      classes.menuIconDisplay,
-                      !h.freeze ? classes.defaultHide : classes.defaultShow
-                    )}
-                    onClick={() => freezeColumnHandler(h.colId)}
-                  >
-                    <Lock fontSize="inherit" />
-                  </IconButton>
-                )}
-                {settingsProps.filterable &&
-                  !isNonSearchableColumn(header, h.colId) && (
+                <div className={classes.headerToolsBackground}>
+                  {sorting && (
                     <IconButton
-                      aria-label="Column Filtered"
+                      aria-label="Column Freezed"
                       size="small"
                       className={clsx(
-                        !showFilter(h.colId)
-                          ? classes.defaultHide
-                          : classes.defaultShow,
-                        classes.menuIconDisplay
+                        classes.menuIconDisplay,
+                        sorting.property === h.colId
+                          ? classes.defaultShow
+                          : classes.defaultHide
                       )}
-                      onClick={(e) => openHeaderFilter(e, h)}
+                      disabled={!settingsProps.ordering}
+                      onClick={() => {
+                        if (isSortable(h)) {
+                          sortColumn(h)
+                        }
+                      }}
                     >
-                      <FilterList fontSize="inherit" />
+                      {sorting.order === 'desc' ? (
+                        <ArrowUpwardSharp fontSize="small" />
+                      ) : (
+                        <ArrowDownwardSharp fontSize="small" />
+                      )}
                     </IconButton>
                   )}
-                <IconButton
-                  aria-label="Column Settings"
-                  size="small"
-                  onClick={(e) => openHeaderTool(e, h)}
-                  className={clsx(classes.menuIconDisplay)}
-                >
-                  <MoreVert fontSize="inherit" />
-                </IconButton>
+                  {((settingsProps.freezeColumm && h.freezable !== false) ||
+                    (!settingsProps.freezeColumm && h.freezable)) && (
+                    <IconButton
+                      aria-label="Column Freezed"
+                      size="small"
+                      className={clsx(
+                        classes.menuIconDisplay,
+                        !h.freeze ? classes.defaultHide : classes.defaultShow
+                      )}
+                      onClick={() => freezeColumnHandler(h.colId)}
+                    >
+                      <Lock fontSize="inherit" />
+                    </IconButton>
+                  )}
+                  {settingsProps.filterable &&
+                    !isNonSearchableColumn(header, h.colId) && (
+                      <IconButton
+                        aria-label="Column Filtered"
+                        size="small"
+                        className={clsx(
+                          !showFilter(h.colId)
+                            ? classes.defaultHide
+                            : classes.defaultShow,
+                          classes.menuIconDisplay
+                        )}
+                        onClick={(e) => openHeaderFilter(e, h)}
+                      >
+                        <FilterList fontSize="inherit" />
+                      </IconButton>
+                    )}
+                  <IconButton
+                    aria-label="Column Settings"
+                    size="small"
+                    onClick={(e) => openHeaderTool(e, h)}
+                    className={clsx(classes.menuIconDisplay)}
+                  >
+                    <MoreVert fontSize="inherit" />
+                  </IconButton>
+                </div>
               </div>
             </div>
           </Resizable>

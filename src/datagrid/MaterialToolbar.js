@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import {
   makeStyles,
@@ -89,7 +89,8 @@ function MaterialToolbar(props) {
     calculatedSelected,
     showSelectedData,
     showSelectedDataHandler,
-    updateSearchTerm
+    updateSearchTerm,
+    viewFiltershandler
   } = props
 
   const openHiddenTools = (event) => {
@@ -100,7 +101,9 @@ function MaterialToolbar(props) {
     setSearchEnable(true)
   }
 
-  const startFilter = () => {}
+  const startFilter = useCallback(() => {
+    viewFiltershandler(true)
+  }, [viewFiltershandler])
 
   const startDownload = () => {}
 
@@ -168,6 +171,7 @@ function MaterialToolbar(props) {
     settingsProps.filterable,
     settingsProps.downloadable,
     settingsProps.resetColumn,
+    startFilter,
     tableWidth,
     tableTools
   ])

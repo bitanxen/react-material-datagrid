@@ -11,6 +11,7 @@ import MaterialFooter from './MaterialFooter'
 
 import MaterialHeaderWrapper from './MaterialHeaderWrapper'
 import MaterialBodyWrapper from './MaterialBodyWrapper'
+import MaterialDataFilter from './filter/MaterialDataFilter'
 
 const useStyles = makeStyles((theme) => ({
   /*
@@ -59,12 +60,13 @@ function MaterialDataGrid(props) {
     searchTerm: null,
     filters: null
   })
+  const [showAllFilter, setShowAllFilter] = useState(false)
 
   const {
     theme,
     className,
     tableName,
-    tableSripe,
+    tableStripe,
     header,
     fitColumns,
     data,
@@ -188,11 +190,16 @@ function MaterialDataGrid(props) {
       return false
     }
     const preparedData = data.map((d) => {
-      const row = {}
+      const row = d
       calculatedHeader.forEach((h) => {
         row[h.colId] = h.dataValue ? h.dataValue(d) : d[h.colId]
+
+        if (h.opaqueValue) {
+          row[`_${h.colId}OpaqueValue`] = h.opaqueValue(d)
+        }
+
         if (h.avaterSrc) {
-          row[`${h.colId}Avater`] = h.avaterSrc(d)
+          row[`_${h.colId}Avater`] = h.avaterSrc(d)
         }
       })
       return row
@@ -500,9 +507,24 @@ function MaterialDataGrid(props) {
     })
   }
 
+  const viewFiltershandler = () => {
+    setShowAllFilter(!showAllFilter)
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <div ref={containerRef} className={className}>
+        {showAllFilter && (
+          <MaterialDataFilter
+            show={showAllFilter}
+            header={calculatedHeader}
+            removeFilter={removeFilter}
+            close={viewFiltershandler}
+            filterCriteria={filterCriteria}
+            createUpdateFilter={createUpdateFilter}
+          />
+        )}
+
         <Paper className={classes.paper}>
           <MaterialToolbar
             tableName={tableName}
@@ -526,6 +548,7 @@ function MaterialDataGrid(props) {
               setFilterCriteria({ ...filterCriteria, searchTerm: searchTerm })
             }}
             filterCriteria={filterCriteria}
+            viewFiltershandler={viewFiltershandler}
           />
           <div
             className={classes.tableWrapper}
@@ -578,7 +601,7 @@ function MaterialDataGrid(props) {
               strictBodyHeight={strictBodyHeight}
               defaultRowsPerPage={defaultRowsPerPage}
               internalMessage={internalMessage}
-              tableSripe={tableSripe}
+              tableStripe={tableStripe}
             />
           </div>
           {tableBottomActions && (
@@ -608,7 +631,7 @@ function MaterialDataGrid(props) {
 
 MaterialDataGrid.defaultProps = {
   fitColumns: false,
-  tableSripe: false,
+  tableStripe: false,
   settingsProps: {
     searchable: true,
     filterable: true,
@@ -632,13 +655,14 @@ MaterialDataGrid.propTypes = {
   className: PropTypes.object,
   tableName: PropTypes.string.isRequired,
   tableSize: PropTypes.oneOf(['small', 'medium', 'large', undefined]),
-  tableSripe: PropTypes.bool,
+  tableStripe: PropTypes.bool,
   header: PropTypes.arrayOf(
     PropTypes.shape({
       isIdCol: PropTypes.bool,
       colId: PropTypes.string.isRequired,
       colName: PropTypes.string.isRequired,
       dataValue: PropTypes.func,
+      opaqueValue: PropTypes.func,
       dataType: PropTypes.oneOf([
         'string',
         'number',

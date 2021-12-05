@@ -15,7 +15,10 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: 'rgba(255, 255, 255, 5%)'
     },
     'div.material-data-grid-body::-webkit-scrollbar-thumb': {
-      backgroundColor: theme.palette.type === 'light' ? theme.palette.primary[50] : 'rgba(124, 124, 124, 50%)'
+      backgroundColor:
+        theme.palette.type === 'light'
+          ? theme.palette.primary[50]
+          : 'rgba(124, 124, 124, 50%)'
       // border: '2px solid #555555'
     },
     'div.material-data-grid-body::-webkit-scrollbar-thumb:hover': {
@@ -35,7 +38,7 @@ function MaterialBodyWrapper(props) {
 
   const {
     tableSize,
-    tableSripe,
+    tableStripe,
     freezeColumnWidth,
     regularColumnWidth,
     header,
@@ -108,7 +111,7 @@ function MaterialBodyWrapper(props) {
               dataSelectionHandler={dataSelectionHandler}
               rowsPerPage={rowsPerPage}
               page={page}
-              tableSripe={tableSripe}
+              tableStripe={tableStripe}
             />
           </div>
           <div
@@ -137,7 +140,7 @@ function MaterialBodyWrapper(props) {
               dataSelectionHandler={dataSelectionHandler}
               rowsPerPage={rowsPerPage}
               page={page}
-              tableSripe={tableSripe}
+              tableStripe={tableStripe}
             />
           </div>
         </>

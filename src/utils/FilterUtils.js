@@ -61,7 +61,7 @@ export const isFilterPassed = (data, filters, dataType) => {
 }
 
 const checkStringFilter = (data, f) => {
-  const actualValue = data ? data.toLowerCase() : ''
+  const actualValue = data ? data.toString().toLowerCase() : ''
   const targetValue = f.filterValue ? f.filterValue.toLowerCase() : ''
   switch (f.operator) {
     case 'Equals': {

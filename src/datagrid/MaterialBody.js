@@ -52,7 +52,10 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'rgb(0, 0, 0, 0%)'
   },
   cellValueHyperlink: {
-    color: theme.palette.type === 'light' ? theme.palette.primary[500] : theme.palette.primary[200],
+    color:
+      theme.palette.type === 'light'
+        ? theme.palette.primary[500]
+        : theme.palette.primary[200],
     fontWeight: 600,
     fontSize: '0.9rem'
   },
@@ -77,7 +80,7 @@ function MaterialBody(props) {
     dataSelectionHandler,
     page,
     rowsPerPage,
-    tableSripe
+    tableStripe
   } = props
 
   const isSelected = (row) => {
@@ -186,7 +189,14 @@ function MaterialBody(props) {
               {((freezeSection && freezeColumnWidth > 0) ||
                 (!freezeSection && freezeColumnWidth === 0)) &&
                 (dataSelectionHandler || calculatedSelected) && (
-                  <div className={clsx(classes.bodyCell, tableSripe && index % 2 === 0 ? classes.bodyRowEven : classes.bodyRowOdd)}>
+                  <div
+                    className={clsx(
+                      classes.bodyCell,
+                      tableStripe && index % 2 === 0
+                        ? classes.bodyRowEven
+                        : classes.bodyRowOdd
+                    )}
+                  >
                     <Checkbox
                       style={{ padding: 0 }}
                       checked={isSelected(row)}
@@ -201,7 +211,12 @@ function MaterialBody(props) {
                 .filter((h) => h.freeze === freezeSection)
                 .map((h) => (
                   <div
-                    className={clsx(classes.bodyCell, tableSripe && index % 2 === 0 ? classes.bodyRowEven : classes.bodyRowOdd)}
+                    className={clsx(
+                      classes.bodyCell,
+                      tableStripe && index % 2 === 0
+                        ? classes.bodyRowEven
+                        : classes.bodyRowOdd
+                    )}
                     style={{
                       minWidth: h.targetWidth,
                       width: h.targetWidth,
@@ -224,7 +239,7 @@ function MaterialBody(props) {
                       <div style={{ marginRight: '10px' }}>
                         <Avatar
                           alt={h.avaterText || ''}
-                          src={row[`${h.colId}Avater`]}
+                          src={row[`_${h.colId}Avater`]}
                           className={classes.avater}
                         />
                       </div>
@@ -255,7 +270,12 @@ function MaterialBody(props) {
                             }}
                           >
                             <Typography
-                              className={clsx(classes.cellValue, h.clickHandler ? classes.cellValueHyperlink : classes.cellValueNormal)}
+                              className={clsx(
+                                classes.cellValue,
+                                h.clickHandler
+                                  ? classes.cellValueHyperlink
+                                  : classes.cellValueNormal
+                              )}
                             >
                               {row[h.colId]}
                             </Typography>
